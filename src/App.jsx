@@ -33,12 +33,12 @@ const BONUS_MATRIX = {
     "Perfect": {
       "A": [24.5, 24.75, 25, 25.25, 25.5, 25.75],
       "B": [24, 24.25, 24.5, 24.75, 25, 25.25],
-      "C": [24]  // Only defined for <1
+      "C": [24]
     },
     "Meets": {
       "A": [24.25, 24.5, 24.75, 25, 25.25, 25.5],
       "B": [24, 24.25, 24.5, 24.75, 25, 25.25],
-      "C": [24]  // Use base rate
+      "C": [24]
     }
   },
   "Fair": {
@@ -81,14 +81,12 @@ function getBonusRate(scorecard, rating, tier, tenure) {
   const matrix = BONUS_MATRIX[cleanScorecard]?.[cleanRating];
   if (!matrix) return { rate: null, addOn: null, reason: "Invalid rating or scorecard" };
 
-  // S-Tier override: use highest rate available
   if (cleanTier === "S-TIER") {
     const top = Object.values(matrix).flat().filter(Number.isFinite);
     const rate = Math.max(...top);
     return { rate, addOn: rate - 24, reason: null };
   }
 
-  // For Poor, use "All" tier
   const tierKey = cleanScorecard === "Poor" ? "All" : cleanTier;
   const rates = matrix[tierKey];
   const rate = Array.isArray(rates) ? rates[idx] : null;
@@ -123,6 +121,9 @@ export default function App() {
       <select value={rating} onChange={(e) => setRating(e.target.value)}>
         {RATING_OPTIONS.map(r => <option key={r}>{r}</option>)}
       </select>
+      <small style={{ display: "block", marginBottom: "10px" }}>
+        Drivers rated <strong>Needs Improvement</strong> or <strong>Action Required</strong> are not eligible for bonuses.
+      </small>
 
       <label>Tier Grade:</label>
       <select value={tier} onChange={(e) => setTier(e.target.value)}>
@@ -143,9 +144,15 @@ export default function App() {
         <div style={{ marginTop: "1rem" }}>
           {result.rate ? (
             <>
-              <strong>Total Rate:</strong> ${result.rate.toFixed(2)}/hr<br />
+              {role === "Driver" && (
+                <>
+                  <strong>Total Rate:</strong> ${result.rate.toFixed(2)}/hr<br />
+                </>
+              )}
               <strong>TierOne Bonus:</strong> +${result.addOn.toFixed(2)}<br />
-              <em>(Apply bonus to your own base pay — varies by role)</em>
+              {role !== "Driver" && (
+                <em>(Apply this bonus to your own base pay)</em>
+              )}
             </>
           ) : (
             <span style={{ color: "red" }}>⚠️ {result.reason}</span>
