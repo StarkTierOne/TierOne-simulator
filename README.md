@@ -7,6 +7,8 @@ This simulator is part of Stark’s TierOne system, which calculates performance
 **Initial deployment timestamp:** July 3, 2025  
 **GitHub public release timestamp:** July 3, 2025  
 **Vercel deployment timestamp:** July 3, 2025  
-**Archive.org record created:** [add link here]
+**Archive.org record created:** https://web.archive.org/web/20250704083708/https://tier-one-simulator.vercel.app/
+
+
 
 Maintained by: Stark Industries Corporation
