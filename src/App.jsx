@@ -1,232 +1,115 @@
-import React, { useState } from "react";
+// TierOne Bonus Simulator - React App (with OT logic for hours > 40)
+import React, { useState } from 'react';
+import './App.css';
 
-const BONUS_MATRIX = {
-  "Fantastic Plus": {
-    Perfect: {
-      A: [26, 27, 28, 29, 30, 32],
-      B: [25, 26, 27, 28, 29, 30],
-      C: [24.75, 25, 25.25, 25.5, 25.75, 26],
-      "D & F": [24],
-    },
-    Meets: {
-      A: [25, 26, 27, 28, 29, 30],
-      B: [24.5, 25, 25.5, 26, 26.5, 27],
-      C: [24.25, 24.5, 24.75, 25, 25.25, 25.5],
-      "D & F": [24],
-    },
-  },
-  Fantastic: {
-    Perfect: {
-      A: [25, 26, 27, 28, 29, 30],
-      B: [24.5, 25, 25.5, 26, 26.5, 27],
-      C: [24.25, 24.5, 24.75, 25, 25.25, 25.5],
-      "D & F": [24],
-    },
-    Meets: {
-      A: [24.75, 25, 25.25, 25.5, 25.75, 26],
-      B: [24.25, 24.5, 24.75, 25, 25.25, 25.5],
-      C: [24, 24.25, 24.5, 24.75, 25, 25.25],
-      "D & F": [24],
-    },
-  },
-  Good: {
-    Perfect: {
-      A: [24.5, 24.75, 25, 25.25, 25.5, 25.75],
-      B: [24, 24.25, 24.5, 24.75, 25, 25.25],
-      C: [24],
-    },
-    Meets: {
-      A: [24.25, 24.5, 24.75, 25, 25.25, 25.5],
-      B: [24, 24.25, 24.5, 24.75, 25, 25.25],
-      C: [24],
-    },
-  },
-  Fair: {
-    Perfect: { A: [24, 24.25, 24.5, 24.75, 25, 25.25], B: [24] },
-    Meets: { A: [24, 24.25, 24.5, 24.75, 25, 25.25], B: [24] },
-  },
-  Poor: {
-    Perfect: { All: [24] },
-    Meets: { All: [24] },
-  },
-};
+const scorecardLevels = ['Fantastic+', 'Fantastic', 'Good', 'Fair', 'Poor'];
+const weeklyRatings = ['Perfect', 'Meets', 'Needs Improvement (NI)', 'Action Required (AR)'];
+const grades = ['A', 'B', 'C', 'D', 'F'];
+const tenures = ['< 1 year', '1 year', '2 years', '3 years', '4 years', '5+ years'];
 
-const TIER_OPTIONS = ["S-TIER", "A", "B", "C", "D & F"];
-const SCORECARD_OPTIONS = ["Fantastic Plus", "Fantastic", "Good", "Fair", "Poor"];
-const RATING_OPTIONS = ["Perfect", "Meets"];
-const ROLE_OPTIONS = ["Driver", "Trainer", "Supervisor"];
-const TENURE_OPTIONS = ["< 1", "1", "2", "3", "4", "5", "5+"];
-const NETRADYNE_STATUS_OPTIONS = ["Gold", "Silver", "None"];
-const DRIVER_EVENT_OPTIONS = ["No", "Yes"];
+function App() {
+  const [scorecard, setScorecard] = useState('Fantastic+');
+  const [rating, setRating] = useState('Perfect');
+  const [grade, setGrade] = useState('A');
+  const [tenure, setTenure] = useState('1 year');
+  const [showFAQ, setShowFAQ] = useState(false);
+  const [hoursWorked, setHoursWorked] = useState(40);
 
-function getTenureIndex(tenure) {
-  if (tenure === "< 1") return 0;
-  if (tenure === "5+") return 5;
-  const t = parseInt(tenure);
-  return isNaN(t) ? null : Math.min(t, 5);
-}
+  const baseRate = 24;
 
-function getBonusRate(scorecard, rating, tier, tenure) {
-  const idx = getTenureIndex(tenure);
-  if (idx === null) return { rate: null, addOn: null, reason: "Invalid tenure" };
+  const disqualified = rating.includes('NI') || rating.includes('AR');
+  const qualified = !disqualified && (grade === 'A' || grade === 'B' || (grade === 'C' && (scorecard.includes('Fantastic') && (rating === 'Perfect' || tenure !== '< 1 year'))));
 
-  const cleanScorecard = scorecard.trim();
-  const cleanRating = rating.trim();
-  const cleanTier = tier.trim();
+  const tenureYears = parseInt(tenure[0]) || 0;
+  const bonusPerHour = qualified
+    ? grade === 'A' && rating === 'Perfect' && tenureYears >= 5
+      ? 8
+      : 3.25
+    : 0;
 
-  const matrix = BONUS_MATRIX[cleanScorecard]?.[cleanRating];
-  if (!matrix) return { rate: null, addOn: null, reason: "Invalid scorecard or rating" };
+  const regularHours = Math.min(hoursWorked, 40);
+  const overtimeHours = Math.max(hoursWorked - 40, 0);
 
-  if (cleanTier === "S-TIER") {
-    const allRates = Object.values(matrix).flat().filter(Number.isFinite);
-    const rate = Math.max(...allRates);
-    return { rate, addOn: rate - 24, reason: null };
-  }
-
-  const tierKey = cleanScorecard === "Poor" ? "All" : cleanTier;
-  const rates = matrix[tierKey];
-  const rate = Array.isArray(rates) ? rates[idx] : null;
-  return rate ? { rate, addOn: rate - 24, reason: null } : { rate: null, addOn: null, reason: "No eligible bonus" };
-}
-
-const formatDecimal = (val) => (val ? val.toFixed(2) : "0.00");
-
-export default function App() {
-  const [scorecard, setScorecard] = useState("Fantastic");
-  const [rating, setRating] = useState("Perfect");
-  const [tier, setTier] = useState("A");
-  const [tenure, setTenure] = useState("< 1");
-  const [role, setRole] = useState("Driver");
-  const [baseRate, setBaseRate] = useState("");
-  const [hoursWorked, setHoursWorked] = useState("");
-  const [netradyneStatus, setNetradyneStatus] = useState("Gold");
-  const [driverEvent, setDriverEvent] = useState("No");
-  const [result, setResult] = useState(null);
-
-  const calculate = () => {
-    const bonus = getBonusRate(scorecard, rating, tier, tenure);
-    if (!bonus.rate) return setResult(bonus);
-
-    const base = role === "Driver" ? 24 : parseFloat(baseRate);
-    const hours = parseFloat(hoursWorked);
-    const validBase = !isNaN(base);
-    const validHours = !isNaN(hours);
-    const cappedHours = validHours ? Math.min(hours, 40) : null;
-    const bonusTotal = validHours ? bonus.addOn * cappedHours : null;
-    const totalPay = validBase && validHours ? (base + bonus.addOn) * cappedHours : null;
-
-    let netradyneBonus = 0;
-    if (driverEvent === "No") {
-      if (netradyneStatus === "Gold") netradyneBonus = 20;
-      else if (netradyneStatus === "Silver") netradyneBonus = 10;
-    }
-
-    setResult({
-      ...bonus,
-      baseRate: validBase ? base : null,
-      hoursWorked: validHours ? cappedHours : null,
-      bonusTotal,
-      totalPay,
-      netradyneBonus,
-    });
-  };
+  const bonusTotal = bonusPerHour * regularHours;
+  const basePay = baseRate * regularHours + baseRate * 1.5 * overtimeHours;
+  const totalPay = basePay + bonusTotal;
 
   return (
-    <div style={{ maxWidth: 600, margin: "auto", padding: "2rem", fontFamily: "sans-serif" }}>
-      <h1 style={{ textAlign: "center" }}>TierOne Bonus Simulator</h1>
+    <div className="min-h-screen bg-gray-100 p-6 font-sans">
+      <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg p-6">
+        <h1 className="text-2xl font-bold text-center mb-4 text-blue-800">🚛 TierOne Bonus Simulator</h1>
+        <p className="text-sm text-center text-gray-500 mb-4">"Earn More. Drive Higher."</p>
 
-      <label>Amazon Scorecard:</label>
-      <select value={scorecard} onChange={(e) => setScorecard(e.target.value)}>
-        {SCORECARD_OPTIONS.map((opt) => (
-          <option key={opt}>{opt}</option>
-        ))}
-      </select>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <label className="block font-semibold">Amazon Scorecard</label>
+            <select value={scorecard} onChange={e => setScorecard(e.target.value)} className="w-full p-2 border rounded">
+              {scorecardLevels.map(level => <option key={level}>{level}</option>)}
+            </select>
+          </div>
 
-      <label>Weekly Rating:</label>
-      <select value={rating} onChange={(e) => setRating(e.target.value)}>
-        {RATING_OPTIONS.map((opt) => (
-          <option key={opt}>{opt}</option>
-        ))}
-      </select>
+          <div>
+            <label className="block font-semibold">Weekly Rating</label>
+            <select value={rating} onChange={e => setRating(e.target.value)} className="w-full p-2 border rounded">
+              {weeklyRatings.map(level => <option key={level}>{level}</option>)}
+            </select>
+            {disqualified && <p className="text-sm text-red-600 mt-1">⚠️ You are disqualified from all bonuses this week due to NI or AR rating.</p>}
+          </div>
 
-      <label>Tier Grade:</label>
-      <select value={tier} onChange={(e) => setTier(e.target.value)}>
-        {TIER_OPTIONS.map((opt) => (
-          <option key={opt}>{opt}</option>
-        ))}
-      </select>
+          <div>
+            <label className="block font-semibold">TierOne Grade</label>
+            <select value={grade} onChange={e => setGrade(e.target.value)} className="w-full p-2 border rounded">
+              {grades.map(g => <option key={g}>{g}</option>)}
+            </select>
+          </div>
 
-      <label>Tenure (Years):</label>
-      <select value={tenure} onChange={(e) => setTenure(e.target.value)}>
-        {TENURE_OPTIONS.map((opt) => (
-          <option key={opt}>{opt}</option>
-        ))}
-      </select>
+          <div>
+            <label className="block font-semibold">Tenure</label>
+            <select value={tenure} onChange={e => setTenure(e.target.value)} className="w-full p-2 border rounded">
+              {tenures.map(t => <option key={t}>{t}</option>)}
+            </select>
+          </div>
 
-      <label>Role:</label>
-      <select value={role} onChange={(e) => setRole(e.target.value)}>
-        {ROLE_OPTIONS.map((opt) => (
-          <option key={opt}>{opt}</option>
-        ))}
-      </select>
+          <div>
+            <label className="block font-semibold">Hours Worked</label>
+            <input type="number" value={hoursWorked} onChange={e => setHoursWorked(Number(e.target.value))} className="w-full p-2 border rounded" min="0" />
+          </div>
+        </div>
 
-      {role !== "Driver" && (
-        <>
-          <label>Your Base Pay ($/hr):</label>
-          <input type="number" value={baseRate} onChange={(e) => setBaseRate(e.target.value)} placeholder="e.g. 26.00" />
-        </>
-      )}
+        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+          <h2 className="text-lg font-bold mb-2">💰 Bonus Results</h2>
+          <p className="text-lg">Hourly Bonus: <span className="font-bold text-green-600">${bonusPerHour.toFixed(2)}</span></p>
+          <p className="text-lg">Weekly Bonus Total (40 hr cap): <span className="font-bold text-blue-700">${bonusTotal.toFixed(2)}</span></p>
+          <p className="text-lg">Base Pay (w/ OT): <span className="font-bold text-gray-700">${basePay.toFixed(2)}</span></p>
+          <p className="text-lg">Total Weekly Pay (Base + Bonus): <span className="font-bold text-purple-700">${totalPay.toFixed(2)}</span></p>
+          {!qualified && !disqualified && <p className="text-sm text-orange-600 mt-2">⚠️ You did not meet the eligibility requirements this week.</p>}
+        </div>
 
-      <label>Hours Worked This Week <em>(Optional)</em>:</label>
-      <input type="number" value={hoursWorked} onChange={(e) => setHoursWorked(e.target.value)} placeholder="e.g. 40" />
-
-      <hr style={{ margin: "2rem 0" }} />
-
-      <label>Company Netradyne Status:</label>
-      <select value={netradyneStatus} onChange={(e) => setNetradyneStatus(e.target.value)}>
-        {NETRADYNE_STATUS_OPTIONS.map((opt) => (
-          <option key={opt}>{opt}</option>
-        ))}
-      </select>
-
-      <label>Any Severe Events in Last 6 Weeks?</label>
-      <select value={driverEvent} onChange={(e) => setDriverEvent(e.target.value)}>
-        {DRIVER_EVENT_OPTIONS.map((opt) => (
-          <option key={opt}>{opt}</option>
-        ))}
-      </select>
-
-      <button onClick={calculate} style={{ marginTop: 20 }}>Calculate Bonus</button>
-
-      {result && (
-        <div style={{ marginTop: 20 }}>
-          {result.rate ? (
-            <>
-              <strong>TierOne Bonus:</strong> +${formatDecimal(result.addOn)}/hr<br />
-              {result.baseRate !== null && result.hoursWorked !== null && (
-                <>
-                  <strong>Total Bonus This Week:</strong> ${formatDecimal(result.bonusTotal)}<br />
-                  <strong>Total Pay (with Bonus):</strong> ${formatDecimal(result.totalPay)}<br />
-                </>
-              )}
-              {result.baseRate !== null && result.hoursWorked === null && (
-                <>
-                  <strong>Total Hourly Pay:</strong> ${(result.baseRate + result.addOn).toFixed(2)}/hr<br />
-                </>
-              )}
-              {result.baseRate === null && result.hoursWorked !== null && (
-                <>
-                  <strong>Total Bonus This Week:</strong> ${formatDecimal(result.bonusTotal)}<br />
-                </>
-              )}
-              <br />
-              <strong>Netradyne Bonus:</strong> ${formatDecimal(result.netradyneBonus)}
-            </>
-          ) : (
-            <span style={{ color: "red" }}>⚠️ {result.reason}</span>
+        <div className="mt-4">
+          <button onClick={() => setShowFAQ(!showFAQ)} className="text-blue-600 underline font-medium">{showFAQ ? 'Hide FAQ' : 'View FAQ & Explainer'}</button>
+          {showFAQ && (
+            <div className="mt-4 bg-white border border-blue-200 rounded-lg p-4 shadow-inner">
+              <h3 className="text-lg font-bold mb-2 text-blue-800">📘 Bonus Explainer (Made Simple)</h3>
+              <ul className="list-disc list-inside text-sm text-gray-700">
+                <li><strong>Grade</strong> = your past 13 weeks of performance</li>
+                <li><strong>Weekly Rating</strong> = how well you did this week</li>
+                <li><strong>Tenure</strong> = how long you’ve been with the company</li>
+                <li><strong>Scorecard</strong> = how the whole company is doing</li>
+                <li>If you're <strong>NI or AR</strong>, you are not eligible for bonuses or Netradyne rewards</li>
+              </ul>
+              <h3 className="text-md font-bold mt-4 mb-1 text-blue-800">❓ FAQ</h3>
+              <ul className="list-disc list-inside text-sm text-gray-600">
+                <li><strong>Q: Why is my bonus $0?</strong> — You may have an NI or AR rating, or not meet grade + tenure + scorecard requirements.</li>
+                <li><strong>Q: What is the max bonus?</strong> — Up to $8/hr with Perfect rating, A Grade, 5+ year tenure, and Fantastic+ score.</li>
+                <li><strong>Q: Does my bonus change if I miss a day?</strong> — Yes, it can affect your weekly rating and total bonus.</li>
+                <li><strong>Q: What is Netradyne?</strong> — It’s our camera safety score. You must avoid NI/AR to qualify for Netradyne bonuses too.</li>
+              </ul>
+            </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
+
+export default App;
