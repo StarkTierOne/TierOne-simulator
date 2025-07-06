@@ -60,7 +60,6 @@ function getBonusRate(scorecard, rating, tier, tenure) {
 
   return { rate, addOn: rate - 24, reason: null, isSTier: false };
 }
-
 export default function App() {
   const [scorecard, setScorecard] = useState("Fantastic");
   const [rating, setRating] = useState("Perfect");
