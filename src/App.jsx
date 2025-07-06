@@ -86,7 +86,7 @@ export default function App() {
 
     const cappedHours = validHours ? Math.min(hours, 40) : null;
     const bonusTotal = validHours ? (bonus.addOn * cappedHours) : null;
-    const totalPay = validBase && validHours ? ((base + bonus.addOn) * cappedHours) : null;
+    const totalPay = validBase && validHours ? ((base + bonus.addOn) * cappedHours) : null,
 
     setResult({
       ...bonus,
