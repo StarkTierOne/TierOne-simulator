@@ -1,71 +1,94 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 const BONUS_MATRIX = {
   "Fantastic Plus": {
-    "Perfect": { "A": [26, 27, 28, 29, 30, 32], "B": [25, 26, 27, 28, 29, 30], "C": [24.75, 25, 25.25, 25.5, 25.75, 26], "D & F": [24] },
-    "Meets": { "A": [25, 26, 27, 28, 29, 30], "B": [24.5, 25, 25.5, 26, 26.5, 27], "C": [24.25, 24.5, 24.75, 25, 25.25, 25.5], "D & F": [24] }
+    Perfect: {
+      A: [26, 27, 28, 29, 30, 32],
+      B: [25, 26, 27, 28, 29, 30],
+      C: [24.75, 25, 25.25, 25.5, 25.75, 26],
+      "D & F": [24],
+    },
+    Meets: {
+      A: [25, 26, 27, 28, 29, 30],
+      B: [24.5, 25, 25.5, 26, 26.5, 27],
+      C: [24.25, 24.5, 24.75, 25, 25.25, 25.5],
+      "D & F": [24],
+    },
   },
-  "Fantastic": {
-    "Perfect": { "A": [25, 26, 27, 28, 29, 30], "B": [24.5, 25, 25.5, 26, 26.5, 27], "C": [24.25, 24.5, 24.75, 25, 25.25, 25.5], "D & F": [24] },
-    "Meets": { "A": [24.75, 25, 25.25, 25.5, 25.75, 26], "B": [24.25, 24.5, 24.75, 25, 25.25, 25.5], "C": [24, 24.25, 24.5, 24.75, 25, 25.25], "D & F": [24] }
+  Fantastic: {
+    Perfect: {
+      A: [25, 26, 27, 28, 29, 30],
+      B: [24.5, 25, 25.5, 26, 26.5, 27],
+      C: [24.25, 24.5, 24.75, 25, 25.25, 25.5],
+      "D & F": [24],
+    },
+    Meets: {
+      A: [24.75, 25, 25.25, 25.5, 25.75, 26],
+      B: [24.25, 24.5, 24.75, 25, 25.25, 25.5],
+      C: [24, 24.25, 24.5, 24.75, 25, 25.25],
+      "D & F": [24],
+    },
   },
-  "Good": {
-    "Perfect": { "A": [24.5, 24.75, 25, 25.25, 25.5, 25.75], "B": [24, 24.25, 24.5, 24.75, 25, 25.25], "C": [24] },
-    "Meets": { "A": [24.25, 24.5, 24.75, 25, 25.25, 25.5], "B": [24, 24.25, 24.5, 24.75, 25, 25.25], "C": [24] }
+  Good: {
+    Perfect: {
+      A: [24.5, 24.75, 25, 25.25, 25.5, 25.75],
+      B: [24, 24.25, 24.5, 24.75, 25, 25.25],
+      C: [24],
+    },
+    Meets: {
+      A: [24.25, 24.5, 24.75, 25, 25.25, 25.5],
+      B: [24, 24.25, 24.5, 24.75, 25, 25.25],
+      C: [24],
+    },
   },
-  "Fair": {
-    "Perfect": { "A": [24, 24.25, 24.5, 24.75, 25, 25.25], "B": [24] },
-    "Meets": { "A": [24, 24.25, 24.5, 24.75, 25, 25.25], "B": [24] }
+  Fair: {
+    Perfect: { A: [24, 24.25, 24.5, 24.75, 25, 25.25], B: [24] },
+    Meets: { A: [24, 24.25, 24.5, 24.75, 25, 25.25], B: [24] },
   },
-  "Poor": {
-    "Perfect": { "All": [24] },
-    "Meets": { "All": [24] }
-  }
+  Poor: {
+    Perfect: { All: [24] },
+    Meets: { All: [24] },
+  },
 };
 
 const TIER_OPTIONS = ["S-TIER", "A", "B", "C", "D & F"];
 const SCORECARD_OPTIONS = ["Fantastic Plus", "Fantastic", "Good", "Fair", "Poor"];
 const RATING_OPTIONS = ["Perfect", "Meets"];
 const ROLE_OPTIONS = ["Driver", "Trainer", "Supervisor"];
+const TENURE_OPTIONS = ["< 1", "1", "2", "3", "4", "5", "5+"];
 
 function getTenureIndex(tenure) {
-  const t = parseFloat(tenure);
-  if (isNaN(t)) return null;
-  if (t <= 0) return 0;
-  if (t > 5) return 5;
-  return Math.floor(t);
+  if (tenure === "< 1") return 0;
+  if (tenure === "5+") return 5;
+  const t = parseInt(tenure);
+  return isNaN(t) ? null : Math.min(t, 5);
 }
 
 function getBonusRate(scorecard, rating, tier, tenure) {
   const idx = getTenureIndex(tenure);
   if (idx === null) return { rate: null, addOn: null, reason: "Invalid tenure" };
 
-  const cleanScorecard = scorecard.trim();
-  const cleanRating = rating.trim();
-  const cleanTier = tier.trim().toUpperCase();
+  const matrix = BONUS_MATRIX[scorecard]?.[rating];
+  if (!matrix) return { rate: null, addOn: null, reason: "Invalid scorecard or rating" };
 
-  const matrix = BONUS_MATRIX[cleanScorecard]?.[cleanRating];
-  if (!matrix) return { rate: null, addOn: null, reason: "Invalid rating or scorecard" };
-
-  if (cleanTier === "S-TIER") {
-    const top = Object.values(matrix).flat().filter(Number.isFinite);
-    const rate = Math.max(...top);
+  if (tier === "S-TIER") {
+    const allRates = Object.values(matrix).flat().filter(Number.isFinite);
+    const rate = Math.max(...allRates);
     return { rate, addOn: rate - 24, reason: null };
   }
 
-  const tierKey = cleanScorecard === "Poor" ? "All" : cleanTier;
+  const tierKey = scorecard === "Poor" ? "All" : tier;
   const rates = matrix[tierKey];
   const rate = Array.isArray(rates) ? rates[idx] : null;
-  if (!rate) return { rate: null, addOn: null, reason: "Not eligible or missing" };
-
-  return { rate, addOn: rate - 24, reason: null };
+  return rate ? { rate, addOn: rate - 24, reason: null } : { rate: null, addOn: null, reason: "No eligible bonus" };
 }
 
+const formatDecimal = (val) => (val ? val.toFixed(2) : "0.00");
 export default function App() {
   const [scorecard, setScorecard] = useState("Fantastic");
   const [rating, setRating] = useState("Perfect");
   const [tier, setTier] = useState("A");
-  const [tenure, setTenure] = useState("");
+  const [tenure, setTenure] = useState("< 1");
   const [role, setRole] = useState("Driver");
   const [baseRate, setBaseRate] = useState("");
   const [hoursWorked, setHoursWorked] = useState("");
@@ -73,16 +96,12 @@ export default function App() {
 
   const calculate = () => {
     const bonus = getBonusRate(scorecard, rating, tier, tenure);
-    if (!bonus.rate) {
-      setResult(bonus);
-      return;
-    }
+    if (!bonus.rate) return setResult(bonus);
 
     const base = role === "Driver" ? 24 : parseFloat(baseRate);
     const hours = parseFloat(hoursWorked);
     const validBase = !isNaN(base);
     const validHours = !isNaN(hours);
-
     const cappedHours = validHours ? Math.min(hours, 40) : null;
     const bonusTotal = validHours ? bonus.addOn * cappedHours : null;
     const totalPay = validBase && validHours ? (base + bonus.addOn) * cappedHours : null;
@@ -97,63 +116,65 @@ export default function App() {
   };
 
   return (
-    <div style={{ maxWidth: "600px", margin: "auto", padding: "2rem" }}>
-      <h1>TierOne Bonus Simulator</h1>
+    <div style={{ maxWidth: 600, margin: "auto", padding: "2rem", fontFamily: "sans-serif" }}>
+      <h1 style={{ textAlign: "center" }}>TierOne Bonus Simulator</h1>
 
       <label>Amazon Scorecard:</label>
       <select value={scorecard} onChange={(e) => setScorecard(e.target.value)}>
-        {SCORECARD_OPTIONS.map(s => <option key={s}>{s}</option>)}
+        {SCORECARD_OPTIONS.map(opt => <option key={opt}>{opt}</option>)}
       </select>
 
       <label>Weekly Rating:</label>
       <select value={rating} onChange={(e) => setRating(e.target.value)}>
-        {RATING_OPTIONS.map(r => <option key={r}>{r}</option>)}
+        {RATING_OPTIONS.map(opt => <option key={opt}>{opt}</option>)}
       </select>
-      <small style={{ display: "block", marginBottom: "10px" }}>
-        Drivers rated <strong>Needs Improvement</strong> or <strong>Action Required</strong> are not eligible for bonuses.
+      <small style={{ display: "block", marginBottom: 10 }}>
+        Drivers with <strong>Needs Improvement</strong> or <strong>Action Required</strong> are not eligible.
       </small>
 
       <label>Tier Grade:</label>
       <select value={tier} onChange={(e) => setTier(e.target.value)}>
-        {TIER_OPTIONS.map(t => <option key={t}>{t}</option>)}
+        {TIER_OPTIONS.map(opt => <option key={opt}>{opt}</option>)}
       </select>
 
       <label>Tenure (Years):</label>
-      <input value={tenure} onChange={(e) => setTenure(e.target.value)} placeholder="e.g. 1, 2, 5" />
+      <select value={tenure} onChange={(e) => setTenure(e.target.value)}>
+        {TENURE_OPTIONS.map(opt => <option key={opt}>{opt}</option>)}
+      </select>
 
       <label>Role:</label>
       <select value={role} onChange={(e) => setRole(e.target.value)}>
-        {ROLE_OPTIONS.map(r => <option key={r}>{r}</option>)}
+        {ROLE_OPTIONS.map(opt => <option key={opt}>{opt}</option>)}
       </select>
 
-      {(role !== "Driver") && (
-        <div>
+      {role !== "Driver" && (
+        <>
           <label>Your Base Pay ($/hr):</label>
-          <input value={baseRate} onChange={(e) => setBaseRate(e.target.value)} placeholder="e.g. 26.00" />
-        </div>
+          <input type="number" value={baseRate} onChange={(e) => setBaseRate(e.target.value)} placeholder="e.g. 26.00" />
+        </>
       )}
 
-      <label>Hours Worked This Week:</label>
-      <input value={hoursWorked} onChange={(e) => setHoursWorked(e.target.value)} placeholder="e.g. 38" />
+      <label>Hours Worked This Week <em>(Optional)</em>:</label>
+      <input type="number" value={hoursWorked} onChange={(e) => setHoursWorked(e.target.value)} placeholder="e.g. 40" />
 
-      <button style={{ marginTop: "1rem" }} onClick={calculate}>Calculate Bonus</button>
+      <button onClick={calculate} style={{ marginTop: 20 }}>Calculate Bonus</button>
 
       {result && (
-        <div style={{ marginTop: "1rem" }}>
+        <div style={{ marginTop: 20 }}>
           {result.rate ? (
             <>
-              <strong>TierOne Bonus:</strong> +${result.addOn.toFixed(2)}/hr<br />
+              <strong>TierOne Bonus:</strong> +${formatDecimal(result.addOn)}/hr<br />
               {result.baseRate !== null && result.hoursWorked !== null && (
                 <>
-                  <strong>Total Bonus This Week:</strong> ${result.bonusTotal.toFixed(2)}<br />
-                  <strong>Total Pay (with Bonus):</strong> ${result.totalPay.toFixed(2)}<br />
+                  <strong>Total Bonus This Week:</strong> ${formatDecimal(result.bonusTotal)}<br />
+                  <strong>Total Pay (with Bonus):</strong> ${formatDecimal(result.totalPay)}<br />
                 </>
               )}
               {result.baseRate !== null && result.hoursWorked === null && (
                 <><strong>Total Hourly Pay:</strong> ${(result.baseRate + result.addOn).toFixed(2)}/hr<br /></>
               )}
               {result.baseRate === null && result.hoursWorked !== null && (
-                <><strong>Total Bonus This Week:</strong> ${result.bonusTotal.toFixed(2)}<br /></>
+                <><strong>Total Bonus This Week:</strong> ${formatDecimal(result.bonusTotal)}<br /></>
               )}
             </>
           ) : (
