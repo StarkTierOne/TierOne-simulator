@@ -61,8 +61,6 @@ function getBonusRate(scorecard, rating, tier, tenure) {
   return { rate, addOn: rate - 24, reason: null };
 }
 
-const formatDecimal = (val) => (val ? val.toFixed(2) : "0.00");
-
 export default function App() {
   const [scorecard, setScorecard] = useState("Fantastic");
   const [rating, setRating] = useState("Perfect");
@@ -86,8 +84,8 @@ export default function App() {
     const validHours = !isNaN(hours);
 
     const cappedHours = validHours ? Math.min(hours, 40) : null;
-    const bonusTotal = validHours ? (bonus.addOn * cappedHours) : null;
-    const totalPay = validBase && validHours ? ((base + bonus.addOn) * cappedHours) : null;
+    const bonusTotal = validHours ? bonus.addOn * cappedHours : null;
+    const totalPay = validBase && validHours ? (base + bonus.addOn) * cappedHours : null;
 
     setResult({
       ...bonus,
@@ -144,18 +142,18 @@ export default function App() {
         <div style={{ marginTop: "1rem" }}>
           {result.rate ? (
             <>
-              <strong>TierOne Bonus:</strong> +${formatDecimal(result.addOn)}/hr<br />
+              <strong>TierOne Bonus:</strong> +${result.addOn.toFixed(2)}/hr<br />
               {result.baseRate !== null && result.hoursWorked !== null && (
                 <>
-                  <strong>Total Bonus This Week:</strong> ${formatDecimal(result.bonusTotal)}<br />
-                  <strong>Total Pay (with Bonus):</strong> ${formatDecimal(result.totalPay)}<br />
+                  <strong>Total Bonus This Week:</strong> ${result.bonusTotal.toFixed(2)}<br />
+                  <strong>Total Pay (with Bonus):</strong> ${result.totalPay.toFixed(2)}<br />
                 </>
               )}
               {result.baseRate !== null && result.hoursWorked === null && (
-                <strong>Total Hourly Pay:</strong> ${(result.baseRate + result.addOn).toFixed(2)}/hr<br />
+                <><strong>Total Hourly Pay:</strong> ${(result.baseRate + result.addOn).toFixed(2)}/hr<br /></>
               )}
               {result.baseRate === null && result.hoursWorked !== null && (
-                <strong>Total Bonus This Week:</strong> ${formatDecimal(result.bonusTotal)}<br />
+                <><strong>Total Bonus This Week:</strong> ${result.bonusTotal.toFixed(2)}<br /></>
               )}
             </>
           ) : (
