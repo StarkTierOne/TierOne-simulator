@@ -35,7 +35,7 @@ function App() {
     )
   );
 
-  const isSTier = grade === 'A' && rating === 'Perfect' && tenureYears >= 5;
+  const isSTier = qualified && grade === 'A' && rating === 'Perfect' && tenureYears >= 5;
   const bonusPerHour = qualified ? (isSTier ? 8 : 3.25) : 0;
 
   const regularHours = Math.min(hoursWorked, 40);
@@ -117,14 +117,27 @@ function App() {
             <div className="mt-4 bg-white border border-blue-200 rounded-lg p-4 shadow-inner">
               <h3 className="text-lg font-bold mb-2 text-blue-800">📘 Bonus Explainer (Made Simple)</h3>
               <ul className="list-disc list-inside text-sm text-gray-700">
-                <li><strong>Grade</strong> = your 13-week average performance</li>
+                <li><strong>Grade</strong> = your 13-week <strong>total score average</strong>, which includes:</li>
+<li className='ml-4'>• On-time performance</li>
+<li className='ml-4'>• Netradyne score</li>
+<li className='ml-4'>• Acceptance rate</li>
+<li className='ml-4'>• Block-level callouts</li>
+<li className='ml-4'>• Load-level callouts</li>
                 <li><strong>Weekly Rating</strong> = how you did this week</li>
                 <li><strong>Tenure</strong> = how long you've been here</li>
                 <li><strong>Scorecard</strong> = how the company is performing</li>
                 <li><strong>NI or AR</strong> = disqualifies you from all bonuses including Netradyne</li>
               </ul>
-              <h3 className="text-md font-bold mt-4 mb-1 text-blue-800">🧠 In-Depth Explanation</h3>
-              <ul className="list-disc list-inside text-sm text-gray-700">
+              <h3 className=\"text-md font-bold mt-4 mb-1 text-blue-800\">🧠 In-Depth Explanation</h3>
+<ul className=\"list-disc list-inside text-sm text-gray-700\">
+<li><strong>Total Score</strong> = based on on-time %, Netradyne, acceptance, and penalties:</li>
+<li className='ml-4'>• On-time ≥ 98%, Netradyne ≥ 900, Acceptance ≥ 99%</li>
+<li className='ml-4'>• Block-level callout = -10 points (2 weeks), 2+ = -15 points</li>
+<li className='ml-4'>• Load-level callout = -17.1 points (1), -20 points (2+ for 6 weeks)</li>
+<li className='ml-4'>• Netradyne ≥ 950 allows slight forgiveness on on-time, but still needs ≥ 97.5% to maintain Meets Requirements</li>
+<li className='ml-4'>• Netradyne 1000 = can still qualify with 97% on-time, 83%+ total score (not enough for B Grade)</li>
+<li className='ml-4'>• Grade B requires 90%+ total score</li>
+<li>83%–89.99% total score = Meets Requirements, often placing the driver in Grade C or D depending on grace week usage</li>
                 <li>TierOne is designed to reward consistency, safety, and team contribution.</li>
                 <li>Your bonus rate is tied to how often you perform at a high level over 13 weeks (Grade), how you did this week (Rating), your tenure, and how well the entire company is doing (Amazon scorecard).</li>
                 <li>The system allows for S-Tier achievement if you’re consistently perfect and long-tenured. This grants access to the highest possible bonus rate.</li>
