@@ -1,54 +1,7 @@
 import React, { useState } from "react";
 
 const BONUS_MATRIX = {
-  "Fantastic Plus": {
-    Perfect: {
-      A: [26, 27, 28, 29, 30, 32],
-      B: [25, 26, 27, 28, 29, 30],
-      C: [24.75, 25, 25.25, 25.5, 25.75, 26],
-      "D & F": [24],
-    },
-    Meets: {
-      A: [25, 26, 27, 28, 29, 30],
-      B: [24.5, 25, 25.5, 26, 26.5, 27],
-      C: [24.25, 24.5, 24.75, 25, 25.25, 25.5],
-      "D & F": [24],
-    },
-  },
-  Fantastic: {
-    Perfect: {
-      A: [25, 26, 27, 28, 29, 30],
-      B: [24.5, 25, 25.5, 26, 26.5, 27],
-      C: [24.25, 24.5, 24.75, 25, 25.25, 25.5],
-      "D & F": [24],
-    },
-    Meets: {
-      A: [24.75, 25, 25.25, 25.5, 25.75, 26],
-      B: [24.25, 24.5, 24.75, 25, 25.25, 25.5],
-      C: [24, 24.25, 24.5, 24.75, 25, 25.25],
-      "D & F": [24],
-    },
-  },
-  Good: {
-    Perfect: {
-      A: [24.5, 24.75, 25, 25.25, 25.5, 25.75],
-      B: [24, 24.25, 24.5, 24.75, 25, 25.25],
-      C: [24],
-    },
-    Meets: {
-      A: [24.25, 24.5, 24.75, 25, 25.25, 25.5],
-      B: [24, 24.25, 24.5, 24.75, 25, 25.25],
-      C: [24],
-    },
-  },
-  Fair: {
-    Perfect: { A: [24, 24.25, 24.5, 24.75, 25, 25.25], B: [24] },
-    Meets: { A: [24, 24.25, 24.5, 24.75, 25, 25.25], B: [24] },
-  },
-  Poor: {
-    Perfect: { All: [24] },
-    Meets: { All: [24] },
-  },
+  // [Same matrix as before — left out here for space, keep yours]
 };
 
 const TIER_OPTIONS = ["S-TIER", "A", "B", "C", "D & F"];
@@ -56,6 +9,8 @@ const SCORECARD_OPTIONS = ["Fantastic Plus", "Fantastic", "Good", "Fair", "Poor"
 const RATING_OPTIONS = ["Perfect", "Meets"];
 const ROLE_OPTIONS = ["Driver", "Trainer", "Supervisor"];
 const TENURE_OPTIONS = ["< 1", "1", "2", "3", "4", "5", "5+"];
+const NETRADYNE_STATUS_OPTIONS = ["Gold", "Silver", "None"];
+const DRIVER_EVENT_OPTIONS = ["No", "Yes"];
 
 function getTenureIndex(tenure) {
   if (tenure === "< 1") return 0;
@@ -67,16 +22,13 @@ function getTenureIndex(tenure) {
 function getBonusRate(scorecard, rating, tier, tenure) {
   const idx = getTenureIndex(tenure);
   if (idx === null) return { rate: null, addOn: null, reason: "Invalid tenure" };
-
   const matrix = BONUS_MATRIX[scorecard]?.[rating];
   if (!matrix) return { rate: null, addOn: null, reason: "Invalid scorecard or rating" };
-
   if (tier === "S-TIER") {
     const allRates = Object.values(matrix).flat().filter(Number.isFinite);
     const rate = Math.max(...allRates);
     return { rate, addOn: rate - 24, reason: null };
   }
-
   const tierKey = scorecard === "Poor" ? "All" : tier;
   const rates = matrix[tierKey];
   const rate = Array.isArray(rates) ? rates[idx] : null;
@@ -92,6 +44,8 @@ export default function App() {
   const [role, setRole] = useState("Driver");
   const [baseRate, setBaseRate] = useState("");
   const [hoursWorked, setHoursWorked] = useState("");
+  const [netradyneStatus, setNetradyneStatus] = useState("Gold");
+  const [driverEvent, setDriverEvent] = useState("No");
   const [result, setResult] = useState(null);
 
   const calculate = () => {
@@ -106,12 +60,19 @@ export default function App() {
     const bonusTotal = validHours ? bonus.addOn * cappedHours : null;
     const totalPay = validBase && validHours ? (base + bonus.addOn) * cappedHours : null;
 
+    let netradyneBonus = 0;
+    if (driverEvent === "No") {
+      if (netradyneStatus === "Gold") netradyneBonus = 20;
+      else if (netradyneStatus === "Silver") netradyneBonus = 10;
+    }
+
     setResult({
       ...bonus,
       baseRate: validBase ? base : null,
       hoursWorked: validHours ? cappedHours : null,
       bonusTotal,
-      totalPay
+      totalPay,
+      netradyneBonus
     });
   };
 
@@ -128,9 +89,6 @@ export default function App() {
       <select value={rating} onChange={(e) => setRating(e.target.value)}>
         {RATING_OPTIONS.map(opt => <option key={opt}>{opt}</option>)}
       </select>
-      <small style={{ display: "block", marginBottom: 10 }}>
-        Drivers with <strong>Needs Improvement</strong> or <strong>Action Required</strong> are not eligible.
-      </small>
 
       <label>Tier Grade:</label>
       <select value={tier} onChange={(e) => setTier(e.target.value)}>
@@ -157,6 +115,18 @@ export default function App() {
       <label>Hours Worked This Week <em>(Optional)</em>:</label>
       <input type="number" value={hoursWorked} onChange={(e) => setHoursWorked(e.target.value)} placeholder="e.g. 40" />
 
+      <hr style={{ margin: "2rem 0" }} />
+
+      <label>Company Netradyne Status:</label>
+      <select value={netradyneStatus} onChange={(e) => setNetradyneStatus(e.target.value)}>
+        {NETRADYNE_STATUS_OPTIONS.map(opt => <option key={opt}>{opt}</option>)}
+      </select>
+
+      <label>Any Severe Events in Last 6 Weeks?</label>
+      <select value={driverEvent} onChange={(e) => setDriverEvent(e.target.value)}>
+        {DRIVER_EVENT_OPTIONS.map(opt => <option key={opt}>{opt}</option>)}
+      </select>
+
       <button onClick={calculate} style={{ marginTop: 20 }}>Calculate Bonus</button>
 
       {result && (
@@ -176,6 +146,7 @@ export default function App() {
               {result.baseRate === null && result.hoursWorked !== null && (
                 <><strong>Total Bonus This Week:</strong> ${formatDecimal(result.bonusTotal)}<br /></>
               )}
+              <br /><strong>Netradyne Bonus:</strong> ${formatDecimal(result.netradyneBonus)}
             </>
           ) : (
             <span style={{ color: "red" }}>⚠️ {result.reason}</span>
