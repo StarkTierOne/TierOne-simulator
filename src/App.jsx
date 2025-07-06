@@ -2,54 +2,20 @@ import React, { useState } from 'react';
 
 const BONUS_MATRIX = {
   "Fantastic Plus": {
-    "Perfect": {
-      "A": [26, 27, 28, 29, 30, 32],
-      "B": [25, 26, 27, 28, 29, 30],
-      "C": [24.75, 25, 25.25, 25.5, 25.75, 26],
-      "D & F": [24]
-    },
-    "Meets": {
-      "A": [25, 26, 27, 28, 29, 30],
-      "B": [24.5, 25, 25.5, 26, 26.5, 27],
-      "C": [24.25, 24.5, 24.75, 25, 25.25, 25.5],
-      "D & F": [24]
-    }
+    "Perfect": { "A": [26, 27, 28, 29, 30, 32], "B": [25, 26, 27, 28, 29, 30], "C": [24.75, 25, 25.25, 25.5, 25.75, 26], "D & F": [24] },
+    "Meets": { "A": [25, 26, 27, 28, 29, 30], "B": [24.5, 25, 25.5, 26, 26.5, 27], "C": [24.25, 24.5, 24.75, 25, 25.25, 25.5], "D & F": [24] }
   },
   "Fantastic": {
-    "Perfect": {
-      "A": [25, 26, 27, 28, 29, 30],
-      "B": [24.5, 25, 25.5, 26, 26.5, 27],
-      "C": [24.25, 24.5, 24.75, 25, 25.25, 25.5],
-      "D & F": [24]
-    },
-    "Meets": {
-      "A": [24.75, 25, 25.25, 25.5, 25.75, 26],
-      "B": [24.25, 24.5, 24.75, 25, 25.25, 25.5],
-      "C": [24, 24.25, 24.5, 24.75, 25, 25.25],
-      "D & F": [24]
-    }
+    "Perfect": { "A": [25, 26, 27, 28, 29, 30], "B": [24.5, 25, 25.5, 26, 26.5, 27], "C": [24.25, 24.5, 24.75, 25, 25.25, 25.5], "D & F": [24] },
+    "Meets": { "A": [24.75, 25, 25.25, 25.5, 25.75, 26], "B": [24.25, 24.5, 24.75, 25, 25.25, 25.5], "C": [24, 24.25, 24.5, 24.75, 25, 25.25], "D & F": [24] }
   },
   "Good": {
-    "Perfect": {
-      "A": [24.5, 24.75, 25, 25.25, 25.5, 25.75],
-      "B": [24, 24.25, 24.5, 24.75, 25, 25.25],
-      "C": [24]
-    },
-    "Meets": {
-      "A": [24.25, 24.5, 24.75, 25, 25.25, 25.5],
-      "B": [24, 24.25, 24.5, 24.75, 25, 25.25],
-      "C": [24]
-    }
+    "Perfect": { "A": [24.5, 24.75, 25, 25.25, 25.5, 25.75], "B": [24, 24.25, 24.5, 24.75, 25, 25.25], "C": [24] },
+    "Meets": { "A": [24.25, 24.5, 24.75, 25, 25.25, 25.5], "B": [24, 24.25, 24.5, 24.75, 25, 25.25], "C": [24] }
   },
   "Fair": {
-    "Perfect": {
-      "A": [24, 24.25, 24.5, 24.75, 25, 25.25],
-      "B": [24]
-    },
-    "Meets": {
-      "A": [24, 24.25, 24.5, 24.75, 25, 25.25],
-      "B": [24]
-    }
+    "Perfect": { "A": [24, 24.25, 24.5, 24.75, 25, 25.25], "B": [24] },
+    "Meets": { "A": [24, 24.25, 24.5, 24.75, 25, 25.25], "B": [24] }
   },
   "Poor": {
     "Perfect": { "All": [24] },
@@ -101,11 +67,33 @@ export default function App() {
   const [tier, setTier] = useState("A");
   const [tenure, setTenure] = useState("");
   const [role, setRole] = useState("Driver");
+  const [baseRate, setBaseRate] = useState("");
+  const [hoursWorked, setHoursWorked] = useState("");
   const [result, setResult] = useState(null);
 
   const calculate = () => {
     const bonus = getBonusRate(scorecard, rating, tier, tenure);
-    setResult(bonus);
+    if (!bonus.rate) {
+      setResult(bonus);
+      return;
+    }
+
+    const base = role === "Driver" ? 24 : parseFloat(baseRate);
+    const hours = parseFloat(hoursWorked);
+    const validBase = !isNaN(base);
+    const validHours = !isNaN(hours);
+
+    const cappedHours = validHours ? Math.min(hours, 40) : null;
+    const bonusTotal = validHours ? (bonus.addOn * cappedHours) : null;
+    const totalPay = validBase && validHours ? ((base + bonus.addOn) * cappedHours) : null;
+
+    setResult({
+      ...bonus,
+      baseRate: validBase ? base : null,
+      hoursWorked: validHours ? cappedHours : null,
+      bonusTotal,
+      totalPay
+    });
   };
 
   return (
@@ -138,20 +126,34 @@ export default function App() {
         {ROLE_OPTIONS.map(r => <option key={r}>{r}</option>)}
       </select>
 
+      {(role !== "Driver") && (
+        <div>
+          <label>Your Base Pay ($/hr):</label>
+          <input value={baseRate} onChange={(e) => setBaseRate(e.target.value)} placeholder="e.g. 26.00" />
+        </div>
+      )}
+
+      <label>Hours Worked This Week:</label>
+      <input value={hoursWorked} onChange={(e) => setHoursWorked(e.target.value)} placeholder="e.g. 38" />
+
       <button style={{ marginTop: "1rem" }} onClick={calculate}>Calculate Bonus</button>
 
       {result && (
         <div style={{ marginTop: "1rem" }}>
           {result.rate ? (
             <>
-              {role === "Driver" && (
+              <strong>TierOne Bonus:</strong> +${result.addOn.toFixed(2)}/hr<br />
+              {result.baseRate !== null && result.hoursWorked !== null && (
                 <>
-                  <strong>Total Rate:</strong> ${result.rate.toFixed(2)}/hr<br />
+                  <strong>Total Bonus This Week:</strong> ${result.bonusTotal.toFixed(2)}<br />
+                  <strong>Total Pay (with Bonus):</strong> ${result.totalPay.toFixed(2)}<br />
                 </>
               )}
-              <strong>TierOne Bonus:</strong> +${result.addOn.toFixed(2)}<br />
-              {role !== "Driver" && (
-                <em>(Apply this bonus to your own base pay)</em>
+              {result.baseRate !== null && result.hoursWorked === null && (
+                <strong>Total Hourly Pay:</strong> ${(result.baseRate + result.addOn).toFixed(2)}/hr<br />
+              )}
+              {result.baseRate === null && result.hoursWorked !== null && (
+                <strong>Total Bonus This Week:</strong> ${result.bonusTotal.toFixed(2)}<br />
               )}
             </>
           ) : (
