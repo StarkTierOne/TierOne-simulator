@@ -50,7 +50,7 @@ function getBonusRate(scorecard, rating, tier, tenure) {
   if (cleanTier === "S-TIER") {
     const top = Object.values(matrix).flat().filter(Number.isFinite);
     const rate = Math.max(...top);
-    return { rate, addOn: rate - 24, reason: null };
+    return { rate, addOn: rate - 24, reason: null, isSTier: true };
   }
 
   const tierKey = cleanScorecard === "Poor" ? "All" : cleanTier;
@@ -58,7 +58,7 @@ function getBonusRate(scorecard, rating, tier, tenure) {
   const rate = Array.isArray(rates) ? rates[idx] : null;
   if (!rate) return { rate: null, addOn: null, reason: "Not eligible or missing" };
 
-  return { rate, addOn: rate - 24, reason: null };
+  return { rate, addOn: rate - 24, reason: null, isSTier: false };
 }
 
 export default function App() {
@@ -71,6 +71,8 @@ export default function App() {
   const [hoursWorked, setHoursWorked] = useState("");
   const [result, setResult] = useState(null);
 
+  const formatDecimal = (val) => (val ? val.toFixed(2) : "0.00");
+
   const calculate = () => {
     const bonus = getBonusRate(scorecard, rating, tier, tenure);
     if (!bonus.rate) {
@@ -78,7 +80,7 @@ export default function App() {
       return;
     }
 
-    const base = role === "Driver" ? 24 : parseFloat(baseRate);
+    const base = role === "Driver" ? 24 : parseFloat(parseFloat(baseRate).toFixed(2));
     const hours = parseFloat(hoursWorked);
     const validBase = !isNaN(base);
     const validHours = !isNaN(hours);
@@ -126,15 +128,23 @@ export default function App() {
         {ROLE_OPTIONS.map(r => <option key={r}>{r}</option>)}
       </select>
 
-      {(role !== "Driver") && (
+      {role !== "Driver" && (
         <div>
           <label>Your Base Pay ($/hr):</label>
-          <input value={baseRate} onChange={(e) => setBaseRate(e.target.value)} placeholder="e.g. 26.00" />
+          <input
+            value={baseRate}
+            onChange={(e) => setBaseRate(e.target.value)}
+            placeholder="e.g. 26.00"
+          />
         </div>
       )}
 
       <label>Hours Worked This Week:</label>
-      <input value={hoursWorked} onChange={(e) => setHoursWorked(e.target.value)} placeholder="e.g. 38" />
+      <input
+        value={hoursWorked}
+        onChange={(e) => setHoursWorked(e.target.value)}
+        placeholder="e.g. 38"
+      />
 
       <button style={{ marginTop: "1rem" }} onClick={calculate}>Calculate Bonus</button>
 
@@ -142,18 +152,19 @@ export default function App() {
         <div style={{ marginTop: "1rem" }}>
           {result.rate ? (
             <>
-              <strong>TierOne Bonus:</strong> +${result.addOn.toFixed(2)}/hr<br />
+              {result.isSTier && <strong style={{ color: "#0070f3" }}>💎 S-Tier Bonus Unlocked!</strong>}<br />
+              <strong>TierOne Bonus:</strong> +${formatDecimal(result.addOn)}/hr<br />
               {result.baseRate !== null && result.hoursWorked !== null && (
                 <>
-                  <strong>Total Bonus This Week:</strong> ${result.bonusTotal.toFixed(2)}<br />
-                  <strong>Total Pay (with Bonus):</strong> ${result.totalPay.toFixed(2)}<br />
+                  <strong>Total Bonus This Week:</strong> ${formatDecimal(result.bonusTotal)}<br />
+                  <strong>Total Pay (with Bonus):</strong> ${formatDecimal(result.totalPay)}<br />
                 </>
               )}
               {result.baseRate !== null && result.hoursWorked === null && (
                 <strong>Total Hourly Pay:</strong> ${(result.baseRate + result.addOn).toFixed(2)}/hr<br />
               )}
               {result.baseRate === null && result.hoursWorked !== null && (
-                <strong>Total Bonus This Week:</strong> ${result.bonusTotal.toFixed(2)}<br />
+                <strong>Total Bonus This Week:</strong> ${formatDecimal(result.bonusTotal)}<br />
               )}
             </>
           ) : (
