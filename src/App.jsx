@@ -1,7 +1,54 @@
 import React, { useState } from "react";
 
 const BONUS_MATRIX = {
-  // [Same matrix as before — left out here for space, keep yours]
+  "Fantastic Plus": {
+    Perfect: {
+      A: [26, 27, 28, 29, 30, 32],
+      B: [25, 26, 27, 28, 29, 30],
+      C: [24.75, 25, 25.25, 25.5, 25.75, 26],
+      "D & F": [24],
+    },
+    Meets: {
+      A: [25, 26, 27, 28, 29, 30],
+      B: [24.5, 25, 25.5, 26, 26.5, 27],
+      C: [24.25, 24.5, 24.75, 25, 25.25, 25.5],
+      "D & F": [24],
+    },
+  },
+  Fantastic: {
+    Perfect: {
+      A: [25, 26, 27, 28, 29, 30],
+      B: [24.5, 25, 25.5, 26, 26.5, 27],
+      C: [24.25, 24.5, 24.75, 25, 25.25, 25.5],
+      "D & F": [24],
+    },
+    Meets: {
+      A: [24.75, 25, 25.25, 25.5, 25.75, 26],
+      B: [24.25, 24.5, 24.75, 25, 25.25, 25.5],
+      C: [24, 24.25, 24.5, 24.75, 25, 25.25],
+      "D & F": [24],
+    },
+  },
+  Good: {
+    Perfect: {
+      A: [24.5, 24.75, 25, 25.25, 25.5, 25.75],
+      B: [24, 24.25, 24.5, 24.75, 25, 25.25],
+      C: [24],
+    },
+    Meets: {
+      A: [24.25, 24.5, 24.75, 25, 25.25, 25.5],
+      B: [24, 24.25, 24.5, 24.75, 25, 25.25],
+      C: [24],
+    },
+  },
+  Fair: {
+    Perfect: { A: [24, 24.25, 24.5, 24.75, 25, 25.25], B: [24] },
+    Meets: { A: [24, 24.25, 24.5, 24.75, 25, 25.25], B: [24] },
+  },
+  Poor: {
+    Perfect: { All: [24] },
+    Meets: { All: [24] },
+  },
 };
 
 const TIER_OPTIONS = ["S-TIER", "A", "B", "C", "D & F"];
@@ -22,20 +69,28 @@ function getTenureIndex(tenure) {
 function getBonusRate(scorecard, rating, tier, tenure) {
   const idx = getTenureIndex(tenure);
   if (idx === null) return { rate: null, addOn: null, reason: "Invalid tenure" };
-  const matrix = BONUS_MATRIX[scorecard]?.[rating];
+
+  const cleanScorecard = scorecard.trim();
+  const cleanRating = rating.trim();
+  const cleanTier = tier.trim();
+
+  const matrix = BONUS_MATRIX[cleanScorecard]?.[cleanRating];
   if (!matrix) return { rate: null, addOn: null, reason: "Invalid scorecard or rating" };
-  if (tier === "S-TIER") {
+
+  if (cleanTier === "S-TIER") {
     const allRates = Object.values(matrix).flat().filter(Number.isFinite);
     const rate = Math.max(...allRates);
     return { rate, addOn: rate - 24, reason: null };
   }
-  const tierKey = scorecard === "Poor" ? "All" : tier;
+
+  const tierKey = cleanScorecard === "Poor" ? "All" : cleanTier;
   const rates = matrix[tierKey];
   const rate = Array.isArray(rates) ? rates[idx] : null;
   return rate ? { rate, addOn: rate - 24, reason: null } : { rate: null, addOn: null, reason: "No eligible bonus" };
 }
 
 const formatDecimal = (val) => (val ? val.toFixed(2) : "0.00");
+
 export default function App() {
   const [scorecard, setScorecard] = useState("Fantastic");
   const [rating, setRating] = useState("Perfect");
@@ -72,7 +127,7 @@ export default function App() {
       hoursWorked: validHours ? cappedHours : null,
       bonusTotal,
       totalPay,
-      netradyneBonus
+      netradyneBonus,
     });
   };
 
@@ -82,27 +137,37 @@ export default function App() {
 
       <label>Amazon Scorecard:</label>
       <select value={scorecard} onChange={(e) => setScorecard(e.target.value)}>
-        {SCORECARD_OPTIONS.map(opt => <option key={opt}>{opt}</option>)}
+        {SCORECARD_OPTIONS.map((opt) => (
+          <option key={opt}>{opt}</option>
+        ))}
       </select>
 
       <label>Weekly Rating:</label>
       <select value={rating} onChange={(e) => setRating(e.target.value)}>
-        {RATING_OPTIONS.map(opt => <option key={opt}>{opt}</option>)}
+        {RATING_OPTIONS.map((opt) => (
+          <option key={opt}>{opt}</option>
+        ))}
       </select>
 
       <label>Tier Grade:</label>
       <select value={tier} onChange={(e) => setTier(e.target.value)}>
-        {TIER_OPTIONS.map(opt => <option key={opt}>{opt}</option>)}
+        {TIER_OPTIONS.map((opt) => (
+          <option key={opt}>{opt}</option>
+        ))}
       </select>
 
       <label>Tenure (Years):</label>
       <select value={tenure} onChange={(e) => setTenure(e.target.value)}>
-        {TENURE_OPTIONS.map(opt => <option key={opt}>{opt}</option>)}
+        {TENURE_OPTIONS.map((opt) => (
+          <option key={opt}>{opt}</option>
+        ))}
       </select>
 
       <label>Role:</label>
       <select value={role} onChange={(e) => setRole(e.target.value)}>
-        {ROLE_OPTIONS.map(opt => <option key={opt}>{opt}</option>)}
+        {ROLE_OPTIONS.map((opt) => (
+          <option key={opt}>{opt}</option>
+        ))}
       </select>
 
       {role !== "Driver" && (
@@ -119,12 +184,16 @@ export default function App() {
 
       <label>Company Netradyne Status:</label>
       <select value={netradyneStatus} onChange={(e) => setNetradyneStatus(e.target.value)}>
-        {NETRADYNE_STATUS_OPTIONS.map(opt => <option key={opt}>{opt}</option>)}
+        {NETRADYNE_STATUS_OPTIONS.map((opt) => (
+          <option key={opt}>{opt}</option>
+        ))}
       </select>
 
       <label>Any Severe Events in Last 6 Weeks?</label>
       <select value={driverEvent} onChange={(e) => setDriverEvent(e.target.value)}>
-        {DRIVER_EVENT_OPTIONS.map(opt => <option key={opt}>{opt}</option>)}
+        {DRIVER_EVENT_OPTIONS.map((opt) => (
+          <option key={opt}>{opt}</option>
+        ))}
       </select>
 
       <button onClick={calculate} style={{ marginTop: 20 }}>Calculate Bonus</button>
@@ -141,12 +210,17 @@ export default function App() {
                 </>
               )}
               {result.baseRate !== null && result.hoursWorked === null && (
-                <><strong>Total Hourly Pay:</strong> ${(result.baseRate + result.addOn).toFixed(2)}/hr<br /></>
+                <>
+                  <strong>Total Hourly Pay:</strong> ${(result.baseRate + result.addOn).toFixed(2)}/hr<br />
+                </>
               )}
               {result.baseRate === null && result.hoursWorked !== null && (
-                <><strong>Total Bonus This Week:</strong> ${formatDecimal(result.bonusTotal)}<br /></>
+                <>
+                  <strong>Total Bonus This Week:</strong> ${formatDecimal(result.bonusTotal)}<br />
+                </>
               )}
-              <br /><strong>Netradyne Bonus:</strong> ${formatDecimal(result.netradyneBonus)}
+              <br />
+              <strong>Netradyne Bonus:</strong> ${formatDecimal(result.netradyneBonus)}
             </>
           ) : (
             <span style={{ color: "red" }}>⚠️ {result.reason}</span>
