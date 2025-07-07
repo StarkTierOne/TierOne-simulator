@@ -2,12 +2,12 @@ import React, { useState } from "react";
 
 export default function App() {
   const [role, setRole] = useState("Driver");
-  const [scorecard, setScorecard] = useState("Fantastic Plus");
-  const [rating, setRating] = useState("Perfect");
-  const [tier, setTier] = useState("A");
-  const [tenure, setTenure] = useState("<1 yr");
+  const [scorecard, setScorecard] = useState("");
+  const [rating, setRating] = useState("");
+  const [tier, setTier] = useState("");
+  const [tenure, setTenure] = useState("");
   const [sTier, setSTier] = useState(false);
-  const [netradyne, setNetradyne] = useState("Gold");
+  const [netradyne, setNetradyne] = useState("");
   const [hours, setHours] = useState("");
   const [otHours, setOtHours] = useState("");
   const [baseRate, setBaseRate] = useState("");
@@ -30,7 +30,7 @@ export default function App() {
   };
 
   const getTenureIndex = () => {
-    if (sTier && scorecard === "Fantastic Plus") return 5; // Only unlocks 5-year pay
+    if (sTier && scorecard === "Fantastic Plus") return 5;
     const years = parseInt(tenure);
     return isNaN(years) ? 0 : Math.min(years, 5);
   };
@@ -42,7 +42,7 @@ export default function App() {
     const rates = card[tierKey];
     if (!rates) return null;
     const base = rates[getTenureIndex()] || 24;
-    const capped = Math.min(base, 32); // Max pay = $24 + $8 bonus
+    const capped = Math.min(base, 32);
     return {
       hourly: capped,
       bonusOnly: (capped - 24).toFixed(2),
@@ -71,43 +71,39 @@ export default function App() {
     <div className="p-6 max-w-4xl mx-auto">
       <h1 className="text-3xl font-bold mb-6">TierOne Bonus Simulator</h1>
 
-      {/* Input Labels */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-sm font-medium text-gray-700">
-        <label>Role</label>
-        <label>Amazon Scorecard</label>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <select value={role} onChange={(e) => setRole(e.target.value)} className="p-2 border rounded">
+          <option value="">Select Role</option>
           <option>Driver</option>
           <option>Trainer</option>
           <option>Supervisor</option>
         </select>
         <select value={scorecard} onChange={(e) => setScorecard(e.target.value)} className="p-2 border rounded">
+          <option value="">Amazon Scorecard</option>
           <option>Fantastic Plus</option>
           <option>Fantastic</option>
           <option>Good</option>
           <option>Fair</option>
           <option>Poor</option>
         </select>
-
-        <label>Weekly Rating</label>
-        <label>Tier Grade</label>
         <select value={rating} onChange={(e) => setRating(e.target.value)} className="p-2 border rounded">
+          <option value="">Weekly Rating</option>
           <option>Perfect</option>
           <option>Meets</option>
           <option>Needs Improvement</option>
           <option>Action Required</option>
         </select>
         <select value={tier} onChange={(e) => setTier(e.target.value)} className="p-2 border rounded">
+          <option value="">Tier Grade</option>
           <option>A</option>
           <option>B</option>
           <option>C</option>
           <option>D</option>
           <option>F</option>
         </select>
-
-        <label>Tenure</label>
-        <label>Netradyne Status</label>
         <select value={tenure} onChange={(e) => setTenure(e.target.value)} className="p-2 border rounded">
-          <option>&lt;1 yr</option>
+          <option value="">Years at Stark</option>
+          <option>&lt;1</option>
           <option>1</option>
           <option>2</option>
           <option>3</option>
@@ -115,30 +111,25 @@ export default function App() {
           <option>5+</option>
         </select>
         <select value={netradyne} onChange={(e) => setNetradyne(e.target.value)} className="p-2 border rounded">
+          <option value="">Netradyne Status</option>
           <option>Gold</option>
           <option>Silver</option>
           <option>None</option>
         </select>
-
-        <label>S-Tier?</label>
-        <label>Hours Worked</label>
         <label className="flex items-center space-x-2">
           <input type="checkbox" checked={sTier} onChange={(e) => setSTier(e.target.checked)} />
-          <span>Enable</span>
+          <span>Enable S-Tier</span>
         </label>
         <input
           type="number"
-          placeholder="Up to 40"
+          placeholder="Hours Worked (Max 40)"
           value={hours}
           onChange={(e) => setHours(e.target.value)}
           className="p-2 border rounded"
         />
-
-        <label>Overtime Hours</label>
-        {role !== "Driver" && <label>Base Rate</label>}
         <input
           type="number"
-          placeholder="e.g. 5"
+          placeholder="OT Hours"
           value={otHours}
           onChange={(e) => setOtHours(e.target.value)}
           className="p-2 border rounded"
@@ -146,7 +137,7 @@ export default function App() {
         {role !== "Driver" && (
           <input
             type="number"
-            placeholder="e.g. 28"
+            placeholder="Base Pay (e.g. 28)"
             value={baseRate}
             onChange={(e) => setBaseRate(e.target.value)}
             className="p-2 border rounded"
@@ -158,7 +149,7 @@ export default function App() {
       <div className="bg-blue-50 p-6 rounded-lg shadow mb-8">
         <h2 className="text-xl font-semibold mb-4">Bonus Results</h2>
         {!result ? (
-          <p className="text-red-600">⚠️ Invalid combination</p>
+          <p className="text-red-600">⚠️ Incomplete or invalid input</p>
         ) : (
           <ul className="space-y-2 text-gray-800">
             <li><strong>Your Base Rate:</strong> ${base.toFixed(2)}</li>
@@ -173,7 +164,7 @@ export default function App() {
         )}
       </div>
 
-      {/* FAQ + Explainer */}
+      {/* FAQ */}
       <div className="faq-section mt-10">
         <h2 className="text-xl font-semibold mb-4">Frequently Asked Questions</h2>
         <details className="mb-2">
@@ -182,30 +173,34 @@ export default function App() {
             A = 10 weeks @ 100%, rest ≥90%, 1 grace week ≥70%<br />
             B = 5 weeks @ 100%, rest ≥90%, 1 grace ≥70% or all 13 ≥90%<br />
             C = Catch-all<br />
-            D = 2+ weeks &lt;70% or 6+ weeks 70–83%<br />
-            F = 5+ weeks &lt;70% or 13 weeks 70–83%
+            D = 2+ weeks below 70% or 6+ between 70–83%<br />
+            F = 5+ weeks below 70% or all 13 weeks between 70–83%
           </p>
         </details>
         <details className="mb-2">
           <summary className="cursor-pointer font-medium">Weekly Rating Definitions</summary>
           <p className="text-sm text-gray-600 mt-1">
-            Perfect = 100% + No Flags<br />
-            Meets = 83–99% no major flag or 100% with minor flag<br />
-            Needs Improvement = 70–82% or minor flags<br />
-            Action Required = &lt;70%, major flag, or 3+ minor flags
-          </p>
-        </details>
-        <details className="mb-2">
-          <summary className="cursor-pointer font-medium">S-Tier and Forgiveness</summary>
-          <p className="text-sm text-gray-600 mt-1">
-            S-Tier requires 13 Perfect weeks. Unlocks 5-year pay if Amazon Scorecard is Fantastic Plus.
-            Forgiveness: Net ≥950 = 97.5% On-time OK. Net = 1000 = 97.0% OK.
+            Perfect = Total score of 100% + No Flags<br />
+            Meets = Total score 83–99% and no major flag, or 100% with a minor flag<br />
+            Needs Improvement = Total score 70–82.99%, or 83–99% with minor flags<br />
+            Action Required = Total score &lt;70%, or any score with 3+ minor flags or one major flag
           </p>
         </details>
         <details className="mb-2">
           <summary className="cursor-pointer font-medium">Call-out Penalties</summary>
           <p className="text-sm text-gray-600 mt-1">
-            Block-level: -10 (1), -15 (2+). Load-level: -17.1 (1), -20 (2+). Duration: 6 weeks.
+            • Block-level callout = -10 points (1 instance over 2 weeks)<br />
+            • 2+ block callouts = -15 points<br />
+            • Load-level callout = -17.1 points (1 instance)<br />
+            • 2+ load-level = -20 points<br />
+            These penalties last for 6 weeks and reduce your Total Score during that time.
+          </p>
+        </details>
+        <details className="mb-2">
+          <summary className="cursor-pointer font-medium">Scorecard Tolerance Rules</summary>
+          <p className="text-sm text-gray-600 mt-1">
+            If your Netradyne score is 950+, you may qualify for Meets Rating with slightly lower On-time (97.5%).<br />
+            A perfect 1000 Netradyne score may allow 97.0% On-time while still qualifying.
           </p>
         </details>
         <a
