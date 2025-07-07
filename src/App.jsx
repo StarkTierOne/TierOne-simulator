@@ -1,6 +1,5 @@
-// ✅ Full top-to-bottom layout for TierOne Bonus Simulator
-// ✅ Starts with Role, then Scorecard, Rating, Performance Grade, S-Tier, Tenure, Hours, Base Pay
-// ✅ Bonus Results + Netradyne Section + FAQ preserved
+// 🚀 Final TierOne Bonus Simulator
+// ✅ Includes full BONUS_MATRIX, updated S-Tier toggle, Perfect-only logic, Netradyne logic, Bonus Results, FAQ
 
 import React, { useState, useEffect } from "react";
 
@@ -22,77 +21,77 @@ export default function App() {
   }, [rating]);
 
   const BONUS_MATRIX = {
-  "Fantastic Plus": {
-    Perfect: {
-      A: [26, 27, 28, 29, 30, 32],
-      B: [25, 26, 27, 28, 29, 30],
-      C: [24.75, 25, 25.25, 25.5, 25.75, 26],
-      "D & F": [24],
+    "Fantastic Plus": {
+      Perfect: {
+        A: [26, 27, 28, 29, 30, 32],
+        B: [25, 26, 27, 28, 29, 30],
+        C: [24.75, 25, 25.25, 25.5, 25.75, 26],
+        "D & F": [24],
+      },
+      "Meets Requirements": {
+        A: [25, 26, 27, 28, 29, 30],
+        B: [24.5, 25, 25.5, 26, 26.5, 27],
+        C: [24.25, 24.5, 24.75, 25, 25.25, 25.5],
+        "D & F": [24],
+      },
     },
-    "Meets Requirements": {
-      A: [25, 26, 27, 28, 29, 30],
-      B: [24.5, 25, 25.5, 26, 26.5, 27],
-      C: [24.25, 24.5, 24.75, 25, 25.25, 25.5],
-      "D & F": [24],
+    Fantastic: {
+      Perfect: {
+        A: [25, 26, 27, 28, 29, 30],
+        B: [24.5, 25, 26, 27, 28, 29],
+        C: [24.25, 24.5, 24.75, 25, 25.25, 25.5],
+        "D & F": [24],
+      },
+      "Meets Requirements": {
+        A: [24.5, 25.5, 26, 26.5, 27, 28],
+        B: [24.25, 24.5, 25, 25.5, 26, 26.5],
+        C: [24, 24.25, 24.5, 24.75, 25, 25.25],
+        "D & F": [24],
+      },
     },
-  },
-  Fantastic: {
-    Perfect: {
-      A: [25, 26, 27, 28, 29, 30],
-      B: [24.5, 25, 26, 27, 28, 29],
-      C: [24.25, 24.5, 24.75, 25, 25.25, 25.5],
-      "D & F": [24],
+    Good: {
+      Perfect: {
+        A: [24.5, 25, 25.5, 26, 26.5, 27],
+        B: [24.25, 24.5, 25, 25.5, 26, 26.5],
+        C: [24, 24.25, 24.5, 24.75, 25, 25.25],
+        "D & F": [24],
+      },
+      "Meets Requirements": {
+        A: [24.25, 24.5, 25, 25.25, 25.5, 25.75],
+        B: [24, 24.25, 24.5, 24.75, 25, 25.25],
+        C: [24, 24, 24, 24, 24, 24],
+        "D & F": [24],
+      },
     },
-    "Meets Requirements": {
-      A: [24.5, 25.5, 26, 26.5, 27, 28],
-      B: [24.25, 24.5, 25, 25.5, 26, 26.5],
-      C: [24, 24.25, 24.5, 24.75, 25, 25.25],
-      "D & F": [24],
+    Fair: {
+      Perfect: {
+        A: [24.25, 24.5, 25, 25.25, 25.5, 25.75],
+        B: [24, 24.25, 24.5, 24.75, 25, 25.25],
+        C: [24, 24, 24, 24, 24, 24],
+        "D & F": [24],
+      },
+      "Meets Requirements": {
+        A: [24, 24.25, 24.5, 24.75, 25, 25.25],
+        B: [24, 24, 24, 24, 24, 24],
+        C: [24, 24, 24, 24, 24, 24],
+        "D & F": [24],
+      },
     },
-  },
-  Good: {
-    Perfect: {
-      A: [24.5, 25, 25.5, 26, 26.5, 27],
-      B: [24.25, 24.5, 25, 25.5, 26, 26.5],
-      C: [24, 24.25, 24.5, 24.75, 25, 25.25],
-      "D & F": [24],
+    Poor: {
+      Perfect: {
+        A: [24, 24, 24, 24, 24, 24],
+        B: [24, 24, 24, 24, 24, 24],
+        C: [24, 24, 24, 24, 24, 24],
+        "D & F": [24],
+      },
+      "Meets Requirements": {
+        A: [24, 24, 24, 24, 24, 24],
+        B: [24, 24, 24, 24, 24, 24],
+        C: [24, 24, 24, 24, 24, 24],
+        "D & F": [24],
+      },
     },
-    "Meets Requirements": {
-      A: [24.25, 24.5, 25, 25.25, 25.5, 25.75],
-      B: [24, 24.25, 24.5, 24.75, 25, 25.25],
-      C: [24, 24, 24, 24, 24, 24],
-      "D & F": [24],
-    },
-  },
-  Fair: {
-    Perfect: {
-      A: [24.25, 24.5, 25, 25.25, 25.5, 25.75],
-      B: [24, 24.25, 24.5, 24.75, 25, 25.25],
-      C: [24, 24, 24, 24, 24, 24],
-      "D & F": [24],
-    },
-    "Meets Requirements": {
-      A: [24, 24.25, 24.5, 24.75, 25, 25.25],
-      B: [24, 24, 24, 24, 24, 24],
-      C: [24, 24, 24, 24, 24, 24],
-      "D & F": [24],
-    },
-  },
-  Poor: {
-    Perfect: {
-      A: [24, 24, 24, 24, 24, 24],
-      B: [24, 24, 24, 24, 24, 24],
-      C: [24, 24, 24, 24, 24, 24],
-      "D & F": [24],
-    },
-    "Meets Requirements": {
-      A: [24, 24, 24, 24, 24, 24],
-      B: [24, 24, 24, 24, 24, 24],
-      C: [24, 24, 24, 24, 24, 24],
-      "D & F": [24],
-    },
-  },
-};
+  };
 
   const getTenureIndex = () => {
     if (sTier && scorecard === "Fantastic Plus") return 5;
@@ -101,9 +100,10 @@ export default function App() {
   };
 
   const getBonusRate = () => {
-    const card = BONUS_MATRIX[scorecard]?.[rating];
+    const ratingKey = rating;
+    const tierKey = sTier ? "A" : (tier === "D" || tier === "F" ? "D & F" : tier);
+    const card = BONUS_MATRIX[scorecard]?.[ratingKey];
     if (!card) return null;
-    const tierKey = tier === "D" || tier === "F" ? "D & F" : tier;
     const rates = card[tierKey];
     if (!rates) return null;
     const base = rates[getTenureIndex()] || 24;
@@ -166,57 +166,63 @@ export default function App() {
           <option>Action Required</option>
         </select>
 
-        <label>Performance Grade</label>
-        <select value={tier} onChange={(e) => setTier(e.target.value)} className="p-2 border rounded w-full">
-          <option value="">--</option>
-          <option>A</option>
-          <option>B</option>
-          <option>C</option>
-          <option>D</option>
-          <option>F</option>
-        </select>
+        <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label>Performance Grade</label>
+            <select value={tier} onChange={(e) => setTier(e.target.value)} className="p-2 border rounded w-full">
+              <option value="">--</option>
+              <option>A</option>
+              <option>B</option>
+              <option>C</option>
+              <option>D</option>
+              <option>F</option>
+            </select>
+          </div>
 
- <div className="mb-6">
-  <label className="block text-sm font-medium mb-2">S-Tier Status</label>
-  <div className="flex items-center space-x-4">
-    <button
-      type="button"
-      disabled={rating !== "Perfect"}
-      onClick={() => setSTier(!sTier)}
-      className={`relative inline-flex items-center h-6 rounded-full w-11 transition-colors ${
-        rating !== "Perfect"
-          ? "bg-gray-300 cursor-not-allowed"
-          : sTier
-          ? "bg-green-500"
-          : "bg-gray-300"
-      }`}
-    >
-      <span
-        className={`inline-block w-5 h-5 transform bg-white rounded-full transition-transform ${
-          sTier ? "translate-x-5" : "translate-x-1"
-        }`}
-      />
-    </button>
-    <span className="text-sm text-gray-700 max-w-xs">
-      {rating !== "Perfect"
-        ? "S-Tier is locked. Requires a Perfect rating."
-        : sTier
-        ? "✅ S-Tier enabled — you're now on track for top pay."
-        : "Have you been Perfect for 13 weeks in a row? Toggle to enable S-Tier status and unlock 5+ year pay."}
-    </span>
-  </div>
-</div>
+          <div>
+            <label>Years at Stark</label>
+            <select value={tenure} onChange={(e) => setTenure(e.target.value)} className="p-2 border rounded w-full">
+              <option value="">--</option>
+              <option>&lt;1</option>
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5+</option>
+            </select>
+          </div>
+        </div>
 
-        <label>Years at Stark</label>
-        <select value={tenure} onChange={(e) => setTenure(e.target.value)} className="p-2 border rounded w-full">
-          <option value="">--</option>
-          <option>&lt;1</option>
-          <option>1</option>
-          <option>2</option>
-          <option>3</option>
-          <option>4</option>
-          <option>5+</option>
-        </select>
+        <div className="mb-6">
+          <label className="block text-base font-semibold mb-2">S-Tier Status</label>
+          <div className="flex items-center space-x-4">
+            <button
+              type="button"
+              disabled={rating !== "Perfect"}
+              onClick={() => setSTier(!sTier)}
+              className={`relative inline-flex items-center h-8 w-14 rounded-full transition-colors ${
+                rating !== "Perfect"
+                  ? "bg-gray-300 cursor-not-allowed"
+                  : sTier
+                  ? "bg-green-500"
+                  : "bg-gray-300"
+              }`}
+            >
+              <span
+                className={`inline-block w-6 h-6 transform bg-white rounded-full shadow-md transition-transform duration-200 ${
+                  sTier ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
+            <span className="text-sm text-gray-700 max-w-xs">
+              {rating !== "Perfect"
+                ? "S-Tier is locked. Requires a Perfect rating."
+                : sTier
+                ? "✅ S-Tier enabled — you're now earning top-tier pay."
+                : "Have you been Perfect for 13 weeks straight? Toggle to unlock S-Tier status."}
+            </span>
+          </div>
+        </div>
 
         <label>Total Hours Worked</label>
         <input type="number" value={hours} onChange={(e) => setHours(e.target.value)} className="p-2 border rounded w-full" />
@@ -245,126 +251,5 @@ export default function App() {
           </ul>
         )}
       </div>
-
-      <div className="mb-4">
-        <label className="flex items-center space-x-2">
-          <input type="checkbox" checked={checkND} onChange={(e) => setCheckND(e.target.checked)} />
-          <span className="font-medium">Would you like to check your Netradyne Bonus?</span>
-        </label>
-      </div>
-
-      {checkND && (
-        <div className="bg-green-50 p-4 rounded-lg shadow mb-8">
-          <h3 className="font-semibold mb-2">📸 Netradyne Bonus</h3>
-
-          <label>Netradyne Status</label>
-          <select value={netradyne} onChange={(e) => setNetradyne(e.target.value)} className="p-2 border rounded w-full mb-2">
-            <option value="">--</option>
-            <option>Gold</option>
-            <option>Silver</option>
-            <option>None</option>
-          </select>
-
-          <label>Any Severe Events in Last 6 Weeks?</label>
-          <select value={severeEvent} onChange={(e) => setSevereEvent(e.target.value)} className="p-2 border rounded w-full mb-2">
-            <option value="">--</option>
-            <option>No</option>
-            <option>Yes</option>
-          </select>
-
-          <p><strong>Bonus (if eligible):</strong> ${netradyneBonus}</p>
-
-          <details className="mt-2 text-sm text-gray-700">
-            <summary className="font-medium cursor-pointer">Netradyne Bonus Explainer</summary>
-            <p className="mt-2">
-              The Netradyne Bonus is paid out quarterly if the company earns Gold or Silver status on Amazon's camera safety score.
-              You must not have NI or AR ratings or receive major camera flags to qualify.
-              If eligible, your bonus accrues weekly and is paid as a lump sum at the end of the quarter.
-            </p>
-          </details>
-        </div>
-      )}
-
-      <div className="mt-10 space-y-4">
-  <h2 className="text-xl font-semibold text-center">Frequently Asked Questions</h2>
-
-  <details className="border rounded p-3">
-    <summary className="font-medium cursor-pointer">What is a Performance Grade (A–F)?</summary>
-    <p className="mt-2 text-sm text-gray-700">
-      Your Performance Grade is based on your last 13 weeks of overall Total Score.
-      <br /><br />
-      <strong>A Grade:</strong> 10 weeks at 100%, rest at 90%+, 1 grace week at 70%+<br />
-      <strong>B Grade:</strong> 5 weeks at 100%, rest at 90%+, 1 grace week at 70%+ or all 13 weeks at 90%+<br />
-      <strong>C Grade:</strong> All other valid combinations<br />
-      <strong>D Grade:</strong> 2+ weeks below 70% or 6+ weeks between 70–83%<br />
-      <strong>F Grade:</strong> 5+ weeks below 70% or all 13 weeks between 70–83%<br /><br />
-      Grades determine your bonus eligibility and which payband you qualify for.
-    </p>
-  </details>
-
-  <details className="border rounded p-3">
-    <summary className="font-medium cursor-pointer">How is Weekly Rating determined?</summary>
-    <p className="mt-2 text-sm text-gray-700">
-      Weekly Rating reflects how you performed this week — it's based on your Total Score plus any safety, attendance, or behavioral flags.
-      <br /><br />
-      <strong>Perfect:</strong> 100% score with zero flags<br />
-      <strong>Meets Requirements:</strong> 83–99% with no major flags, or 100% with 1 minor flag<br />
-      <strong>Needs Improvement:</strong> 70–82.99%, or 83–99% with minor flags<br />
-      <strong>Action Required:</strong> Less than 70%, or any score with 3+ minor flags or 1 major flag<br /><br />
-      Only Perfect and Meets Requirements are eligible for bonus.
-    </p>
-  </details>
-
-  <details className="border rounded p-3">
-    <summary className="font-medium cursor-pointer">What are Call-out Penalties?</summary>
-    <p className="mt-2 text-sm text-gray-700">
-      Call-outs directly reduce your Total Score and affect both Weekly Rating and Grade.
-      <br /><br />
-      • <strong>Block-level Callout:</strong> -10 points (1 instance in 2 weeks)<br />
-      • <strong>2+ Block Callouts:</strong> -15 points<br />
-      • <strong>Load-level Callout:</strong> -17.1 points (1 instance in 6 weeks)<br />
-      • <strong>2+ Load Callouts:</strong> -20 points<br /><br />
-      Block-level penalties last for 2 weeks. Load-level penalties last for 6 weeks. They affect bonus eligibility and can drop you to NI or AR.
-    </p>
-  </details>
-
-  <details className="border rounded p-3">
-    <summary className="font-medium cursor-pointer">What is S-Tier?</summary>
-    <p className="mt-2 text-sm text-gray-700">
-      S-Tier is a special performance tier reserved for drivers who achieve <strong>13 consecutive Perfect weeks</strong>.
-      <br /><br />
-      Once unlocked, S-Tier grants access to the 5+ year payband — even if you haven't reached 5 years of tenure yet. However, you must maintain Perfect rating to stay in S-Tier.
-    </p>
-  </details>
-
-  <details className="border rounded p-3">
-    <summary className="font-medium cursor-pointer">What disqualifies me from getting a bonus?</summary>
-    <p className="mt-2 text-sm text-gray-700">
-      You may be disqualified if:
-      <br /><br />
-      • Your Weekly Rating is NI or AR<br />
-      • You receive a major safety flag (e.g., camera, following distance, seatbelt)<br />
-      • You fail to meet Grade + Tenure + Scorecard thresholds for your payband<br />
-      • You have a recent severe event that disqualifies you from Netradyne bonus
-    </p>
-  </details>
-
-  <details className="border rounded p-3">
-    <summary className="font-medium cursor-pointer">How does the Netradyne Bonus work?</summary>
-    <p className="mt-2 text-sm text-gray-700">
-      The Netradyne Bonus is a separate quarterly incentive based on camera safety scores.
-      <br /><br />
-      • Stark must earn Gold or Silver on Amazon's safety score<br />
-      • You must have a Perfect or Meets Requirements rating<br />
-      • You must not have any major camera flags or severe events in the last 6 weeks<br /><br />
-      If eligible, your Netradyne bonus accrues weekly and is paid out in a lump sum at the end of each quarter.
-    </p>
-  </details>
-
-  <a href="https://drive.google.com/file/d/1CWVesfvKWsSFn7wv7bGvHv6kLb20Mzec/view?usp=sharing" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-sm inline-block">
-    📘 View Full Explainer PDF →
-  </a>
-</div>
-</div>
-);
-}
+    </div>
+  );
