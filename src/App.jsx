@@ -4,6 +4,11 @@ export default function App() {
   const [role, setRole] = useState("");
   const [hoursWorked, setHoursWorked] = useState("");
   const [baseRate, setBaseRate] = useState("");
+  const [tenure, setTenure] = useState("");
+  const [amazonScore, setAmazonScore] = useState("");
+  const [weeklyRating, setWeeklyRating] = useState("");
+  const [grade, setGrade] = useState("");
+
   const isTrainerOrSupervisor = role === "Trainer" || role === "Supervisor";
 
   return (
@@ -53,7 +58,71 @@ export default function App() {
         </div>
       )}
 
-      {/* Placeholder for Bonuses */}
+      {/* Tenure */}
+      <div>
+        <label className="block font-medium mb-1">Years at Stark (Tenure):</label>
+        <input
+          type="number"
+          className="w-full border rounded p-2"
+          placeholder="e.g. 2"
+          step="0.1"
+          value={tenure}
+          onChange={(e) => setTenure(e.target.value)}
+        />
+      </div>
+
+      {/* Amazon Scorecard */}
+      <div>
+        <label className="block font-medium mb-1">Amazon Scorecard Rating:</label>
+        <select
+          className="w-full border rounded p-2"
+          value={amazonScore}
+          onChange={(e) => setAmazonScore(e.target.value)}
+        >
+          <option value="">-- Select Rating --</option>
+          <option value="Fantastic Plus">Fantastic Plus</option>
+          <option value="Fantastic">Fantastic</option>
+          <option value="Good">Good</option>
+          <option value="Fair">Fair</option>
+          <option value="Poor">Poor</option>
+        </select>
+      </div>
+
+      {/* Weekly Rating */}
+      <div>
+        <label className="block font-medium mb-1">Weekly Rating:</label>
+        <select
+          className="w-full border rounded p-2"
+          value={weeklyRating}
+          onChange={(e) => setWeeklyRating(e.target.value)}
+        >
+          <option value="">-- Select Weekly Rating --</option>
+          <option value="Perfect">Perfect</option>
+          <option value="Meets Requirements">Meets Requirements</option>
+          <option value="Needs Improvement">Needs Improvement</option>
+          <option value="Action Required">Action Required</option>
+        </select>
+      </div>
+
+      {/* TierOne Grade */}
+      <div>
+        <label className="block font-medium mb-1">TierOne Grade:</label>
+        <select
+          className="w-full border rounded p-2"
+          value={grade}
+          onChange={(e) => setGrade(e.target.value)}
+        >
+          <option value="">-- Select Grade --</option>
+          <option value="S-Tier">S-Tier</option>
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+          <option value="D">D</option>
+          <option value="F">F</option>
+        </select>
+      </div>
+
+      {/* Placeholder for Output */}
       <div className="mt-6 border-t pt-4">
         <h2 className="font-semibold text-lg">💵 Bonus Results</h2>
         <p className="text-gray-600 italic">
@@ -63,66 +132,3 @@ export default function App() {
     </div>
   );
 }
-{/* Tenure */}
-<div>
-  <label className="block font-medium mb-1">Years at Stark (Tenure):</label>
-  <input
-    type="number"
-    className="w-full border rounded p-2"
-    placeholder="e.g. 2"
-    step="0.1"
-    value={tenure}
-    onChange={(e) => setTenure(e.target.value)}
-  />
-</div>
-
-{/* Amazon Scorecard */}
-<div>
-  <label className="block font-medium mb-1">Amazon Scorecard Rating:</label>
-  <select
-    className="w-full border rounded p-2"
-    value={amazonScore}
-    onChange={(e) => setAmazonScore(e.target.value)}
-  >
-    <option value="">-- Select Rating --</option>
-    <option value="Fantastic Plus">Fantastic Plus</option>
-    <option value="Fantastic">Fantastic</option>
-    <option value="Good">Good</option>
-    <option value="Fair">Fair</option>
-    <option value="Poor">Poor</option>
-  </select>
-</div>
-
-{/* Weekly Rating */}
-<div>
-  <label className="block font-medium mb-1">Weekly Rating:</label>
-  <select
-    className="w-full border rounded p-2"
-    value={weeklyRating}
-    onChange={(e) => setWeeklyRating(e.target.value)}
-  >
-    <option value="">-- Select Weekly Rating --</option>
-    <option value="Perfect">Perfect</option>
-    <option value="Meets Requirements">Meets Requirements</option>
-    <option value="Needs Improvement">Needs Improvement</option>
-    <option value="Action Required">Action Required</option>
-  </select>
-</div>
-
-{/* Grade */}
-<div>
-  <label className="block font-medium mb-1">TierOne Grade:</label>
-  <select
-    className="w-full border rounded p-2"
-    value={grade}
-    onChange={(e) => setGrade(e.target.value)}
-  >
-    <option value="">-- Select Grade --</option>
-    <option value="S-Tier">S-Tier</option>
-    <option value="A">A</option>
-    <option value="B">B</option>
-    <option value="C">C</option>
-    <option value="D">D</option>
-    <option value="F">F</option>
-  </select>
-</div>
