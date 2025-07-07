@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 export default function App() {
-  const [role, setRole] = useState("Driver");
+  const [role, setRole] = useState("");
   const [scorecard, setScorecard] = useState("");
   const [rating, setRating] = useState("");
   const [tier, setTier] = useState("");
@@ -10,6 +10,10 @@ export default function App() {
   const [netradyne, setNetradyne] = useState("");
   const [hours, setHours] = useState("");
   const [baseRate, setBaseRate] = useState("");
+
+  useEffect(() => {
+    if (rating !== "Perfect") setSTier(false);
+  }, [rating]);
 
   const BONUS_MATRIX = {
     "Fantastic Plus": {
@@ -105,12 +109,8 @@ export default function App() {
   };
 
   const result = getBonusRate();
-  const netradyneBonus =
-    (rating === "Perfect" || rating === "Meets") && netradyne !== "None"
-      ? netradyne === "Gold"
-        ? 20
-        : 10
-      : 0;
+  const isEligible = rating === "Perfect" || rating === "Meets";
+  const bonusMessage = !isEligible ? "⚠️ Ineligible for bonus" : "";
 
   const totalHours = parseFloat(hours || 0);
   const otHours = totalHours > 40 ? totalHours - 40 : 0;
@@ -122,60 +122,59 @@ export default function App() {
   const weeklyBonus = (hourlyBonus * baseHours).toFixed(2);
   const basePayInclOT = (base * baseHours + parseFloat(otPay)).toFixed(2);
   const totalWeeklyPay = ((base + hourlyBonus) * baseHours + parseFloat(otPay)).toFixed(2);
+  const netradyneBonus =
+    (rating === "Perfect" || rating === "Meets") && netradyne !== "None"
+      ? netradyne === "Gold"
+        ? 20
+        : 10
+      : 0;
+
+  const dropdownField = (label, value, setter, options) => (
+    <div>
+      <label className="text-sm font-medium text-gray-600 mb-1">{label}</label>
+      <select value={value} onChange={(e) => setter(e.target.value)} className="p-2 border rounded w-full">
+        <option value="">{`Select ${label}`}</option>
+        {options.map((opt) => (
+          <option key={opt} value={opt}>
+            {opt}
+          </option>
+        ))}
+      </select>
+      {value && <p className="text-xs text-gray-500 mt-1">Selected: {value}</p>}
+    </div>
+  );
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <h1 className="text-3xl font-bold mb-6">TierOne Bonus Simulator</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <select value={role} onChange={(e) => setRole(e.target.value)} className="p-2 border rounded">
-          <option value="">Select Role</option>
-          <option>Driver</option>
-          <option>Trainer</option>
-          <option>Supervisor</option>
-        </select>
-        <select value={scorecard} onChange={(e) => setScorecard(e.target.value)} className="p-2 border rounded">
-          <option value="">Amazon Scorecard</option>
-          <option>Fantastic Plus</option>
-          <option>Fantastic</option>
-          <option>Good</option>
-          <option>Fair</option>
-          <option>Poor</option>
-        </select>
-        <select value={rating} onChange={(e) => setRating(e.target.value)} className="p-2 border rounded">
-          <option value="">Weekly Rating</option>
-          <option>Perfect</option>
-          <option>Meets</option>
-          <option>Needs Improvement</option>
-          <option>Action Required</option>
-        </select>
-        <select value={tier} onChange={(e) => setTier(e.target.value)} className="p-2 border rounded">
-          <option value="">Tier Grade</option>
-          <option>A</option>
-          <option>B</option>
-          <option>C</option>
-          <option>D</option>
-          <option>F</option>
-        </select>
-        <select value={tenure} onChange={(e) => setTenure(e.target.value)} className="p-2 border rounded">
-          <option value="">Years at Stark</option>
-          <option>&lt;1</option>
-          <option>1</option>
-          <option>2</option>
-          <option>3</option>
-          <option>4</option>
-          <option>5+</option>
-        </select>
-        <select value={netradyne} onChange={(e) => setNetradyne(e.target.value)} className="p-2 border rounded">
-          <option value="">Netradyne Status</option>
-          <option>Gold</option>
-          <option>Silver</option>
-          <option>None</option>
-        </select>
-        <label className="flex items-center space-x-2">
-          <input type="checkbox" checked={sTier} onChange={(e) => setSTier(e.target.checked)} />
-          <span>Enable S-Tier</span>
-        </label>
+        {dropdownField("Role", role, setRole, ["Driver", "Trainer", "Supervisor"])}
+        {dropdownField("Amazon Scorecard", scorecard, setScorecard, [
+          "Fantastic Plus",
+          "Fantastic",
+          "Good",
+          "Fair",
+          "Poor",
+        ])}
+        {dropdownField("Weekly Rating", rating, setRating, [
+          "Perfect",
+          "Meets",
+          "Needs Improvement",
+          "Action Required",
+        ])}
+        {dropdownField("Tier Grade", tier, setTier, ["A", "B", "C", "D", "F"])}
+        {dropdownField("Tenure (Years)", tenure, setTenure, ["<1", "1", "2", "3", "4", "5+"])}
+        {dropdownField("Netradyne Status", netradyne, setNetradyne, ["Gold", "Silver", "None"])}
+        <div className="flex items-center space-x-2 mt-2">
+          <input
+            type="checkbox"
+            checked={sTier}
+            disabled={rating !== "Perfect"}
+            onChange={(e) => setSTier(e.target.checked)}
+          />
+          <label className="text-sm">Enable S-Tier (Perfect only)</label>
+        </div>
         <input
           type="number"
           placeholder="Total Hours Worked"
@@ -202,57 +201,15 @@ export default function App() {
         ) : (
           <ul className="space-y-2 text-gray-800">
             <li><strong>Your Base Rate:</strong> ${base.toFixed(2)}</li>
-            <li><strong>Hourly Bonus:</strong> +${hourlyBonus.toFixed(2)}</li>
-            <li><strong>New Hourly Pay (Base + Bonus):</strong> ${newHourly}</li>
+            <li><strong>Hourly Bonus:</strong> {isEligible ? `+$${hourlyBonus.toFixed(2)}` : bonusMessage}</li>
+            <li><strong>New Hourly Pay:</strong> {isEligible ? `$${newHourly}` : bonusMessage}</li>
             <li><strong>Overtime Pay:</strong> ${otPay}</li>
-            <li><strong>Weekly Bonus Total (first 40 hrs):</strong> ${weeklyBonus}</li>
+            <li><strong>Weekly Bonus:</strong> {isEligible ? `$${weeklyBonus}` : bonusMessage}</li>
             <li><strong>Base Pay (incl. OT):</strong> ${basePayInclOT}</li>
-            <li><strong>Total Weekly Pay (with Bonus):</strong> ${totalWeeklyPay}</li>
-            <li><strong>Netradyne Bonus:</strong> ${netradyneBonus} (Paid quarterly)</li>
+            <li><strong>Total Weekly Pay:</strong> {isEligible ? `$${totalWeeklyPay}` : bonusMessage}</li>
+            <li><strong>Netradyne Bonus:</strong> ${netradyneBonus}</li>
           </ul>
         )}
-      </div>
-
-      {/* FAQ */}
-      <div className="faq-section mt-10">
-        <h2 className="text-xl font-semibold mb-4">Frequently Asked Questions</h2>
-        <details className="mb-2">
-          <summary className="cursor-pointer font-medium">Performance Grade (A–F)</summary>
-          <p className="text-sm text-gray-600 mt-1">
-            Grades are calculated on a rolling 13-week basis.<br />
-            A = 10 weeks @ 100%, rest ≥90%, 1 grace week ≥70%<br />
-            B = 5 weeks @ 100%, rest ≥90%, 1 grace ≥70% or all 13 ≥90%<br />
-            C = Catch-all<br />
-            D = 2+ weeks below 70% or 6+ between 70–83%<br />
-            F = 5+ weeks below 70% or all 13 weeks between 70–83%
-          </p>
-        </details>
-        <details className="mb-2">
-          <summary className="cursor-pointer font-medium">Weekly Rating Definitions</summary>
-          <p className="text-sm text-gray-600 mt-1">
-            Perfect = Total score of 100% + No Flags<br />
-            Meets = Score 83–99% and no major flag, or 100% with a minor flag<br />
-            Needs Improvement = 70–82.99%, or 83–99% with minor flags<br />
-            Action Required = &lt;70%, or any score with 3+ minor flags or 1 major flag
-          </p>
-        </details>
-        <details className="mb-2">
-          <summary className="cursor-pointer font-medium">Call-out Penalties</summary>
-          <p className="text-sm text-gray-600 mt-1">
-            • Block-level callout = minus 10 points (1 instance across 2 weeks)<br />
-            • 2+ block callouts = minus 15 points<br />
-            • Load-level callout = minus 17.1 points (1 instance across 6 weeks)<br />
-            • 2+ load-level = minus 20 points<br />
-            Block callout penalties last 2 weeks; Load penalties last 6 weeks.
-          </p>
-        </details>
-        <a
-          href="https://drive.google.com/file/d/1CWVesfvKWsSFn7wv7bGvHv6kLb20Mzec/view?usp=sharing"
-          target="_blank"
-          className="inline-block mt-4 text-blue-600 hover:underline"
-        >
-          📘 View Full Explainer PDF →
-        </a>
       </div>
     </div>
   );
