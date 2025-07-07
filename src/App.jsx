@@ -1,7 +1,3 @@
-// ✅ Full top-to-bottom layout for TierOne Bonus Simulator
-// ✅ Starts with Role, then Scorecard, Rating, Performance Grade, S-Tier, Tenure, Hours, Base Pay
-// ✅ Bonus Results + Netradyne Section + FAQ preserved
-
 import React, { useState, useEffect } from "react";
 
 export default function App() {
@@ -231,3 +227,4 @@ export default function App() {
       </div>
     </div>
   );
+}
