@@ -9,7 +9,6 @@ export default function App() {
   const [sTier, setSTier] = useState(false);
   const [netradyne, setNetradyne] = useState("");
   const [hours, setHours] = useState("");
-  const [otHours, setOtHours] = useState("");
   const [baseRate, setBaseRate] = useState("");
 
   const BONUS_MATRIX = {
@@ -24,6 +23,62 @@ export default function App() {
         A: [25, 26, 27, 28, 29, 30],
         B: [24.5, 25, 25.5, 26, 26.5, 27],
         C: [24.25, 24.5, 24.75, 25, 25.25, 25.5],
+        "D & F": [24],
+      },
+    },
+    Fantastic: {
+      Perfect: {
+        A: [25, 26, 27, 28, 29, 30],
+        B: [24.5, 25, 26, 27, 28, 29],
+        C: [24.25, 24.5, 24.75, 25, 25.25, 25.5],
+        "D & F": [24],
+      },
+      Meets: {
+        A: [24.5, 25.5, 26, 26.5, 27, 28],
+        B: [24.25, 24.5, 25, 25.5, 26, 26.5],
+        C: [24, 24.25, 24.5, 24.75, 25, 25.25],
+        "D & F": [24],
+      },
+    },
+    Good: {
+      Perfect: {
+        A: [24.5, 25, 25.5, 26, 26.5, 27],
+        B: [24.25, 24.5, 25, 25.5, 26, 26.5],
+        C: [24, 24.25, 24.5, 24.75, 25, 25.25],
+        "D & F": [24],
+      },
+      Meets: {
+        A: [24.25, 24.5, 25, 25.25, 25.5, 25.75],
+        B: [24, 24.25, 24.5, 24.75, 25, 25.25],
+        C: [24, 24, 24, 24, 24, 24],
+        "D & F": [24],
+      },
+    },
+    Fair: {
+      Perfect: {
+        A: [24.25, 24.5, 25, 25.25, 25.5, 25.75],
+        B: [24, 24.25, 24.5, 24.75, 25, 25.25],
+        C: [24, 24, 24, 24, 24, 24],
+        "D & F": [24],
+      },
+      Meets: {
+        A: [24, 24.25, 24.5, 24.75, 25, 25.25],
+        B: [24, 24, 24, 24, 24, 24],
+        C: [24, 24, 24, 24, 24, 24],
+        "D & F": [24],
+      },
+    },
+    Poor: {
+      Perfect: {
+        A: [24, 24, 24, 24, 24, 24],
+        B: [24, 24, 24, 24, 24, 24],
+        C: [24, 24, 24, 24, 24, 24],
+        "D & F": [24],
+      },
+      Meets: {
+        A: [24, 24, 24, 24, 24, 24],
+        B: [24, 24, 24, 24, 24, 24],
+        C: [24, 24, 24, 24, 24, 24],
         "D & F": [24],
       },
     },
@@ -57,15 +112,16 @@ export default function App() {
         : 10
       : 0;
 
-  const hrs = Math.min(parseFloat(hours || 0), 40);
-  const ot = parseFloat(otHours || 0);
+  const totalHours = parseFloat(hours || 0);
+  const otHours = totalHours > 40 ? totalHours - 40 : 0;
+  const baseHours = Math.min(totalHours, 40);
   const base = role === "Driver" ? 24 : parseFloat(baseRate || 0);
   const hourlyBonus = result ? parseFloat(result.bonusOnly) : 0;
   const newHourly = (base + hourlyBonus).toFixed(2);
-  const otPay = (base * 1.5 * ot).toFixed(2);
-  const weeklyBonus = (hourlyBonus * hrs).toFixed(2);
-  const basePayInclOT = (base * hrs + parseFloat(otPay)).toFixed(2);
-  const totalWeeklyPay = ((base + hourlyBonus) * hrs + parseFloat(otPay)).toFixed(2);
+  const otPay = (base * 1.5 * otHours).toFixed(2);
+  const weeklyBonus = (hourlyBonus * baseHours).toFixed(2);
+  const basePayInclOT = (base * baseHours + parseFloat(otPay)).toFixed(2);
+  const totalWeeklyPay = ((base + hourlyBonus) * baseHours + parseFloat(otPay)).toFixed(2);
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -122,16 +178,9 @@ export default function App() {
         </label>
         <input
           type="number"
-          placeholder="Hours Worked (Max 40)"
+          placeholder="Total Hours Worked"
           value={hours}
           onChange={(e) => setHours(e.target.value)}
-          className="p-2 border rounded"
-        />
-        <input
-          type="number"
-          placeholder="OT Hours"
-          value={otHours}
-          onChange={(e) => setOtHours(e.target.value)}
           className="p-2 border rounded"
         />
         {role !== "Driver" && (
@@ -155,8 +204,8 @@ export default function App() {
             <li><strong>Your Base Rate:</strong> ${base.toFixed(2)}</li>
             <li><strong>Hourly Bonus:</strong> +${hourlyBonus.toFixed(2)}</li>
             <li><strong>New Hourly Pay (Base + Bonus):</strong> ${newHourly}</li>
-            <li><strong>Overtime Rate (Base × 1.5):</strong> ${(base * 1.5).toFixed(2)}</li>
-            <li><strong>Weekly Bonus Total (Max 40 hrs):</strong> ${weeklyBonus}</li>
+            <li><strong>Overtime Pay:</strong> ${otPay}</li>
+            <li><strong>Weekly Bonus Total (first 40 hrs):</strong> ${weeklyBonus}</li>
             <li><strong>Base Pay (incl. OT):</strong> ${basePayInclOT}</li>
             <li><strong>Total Weekly Pay (with Bonus):</strong> ${totalWeeklyPay}</li>
             <li><strong>Netradyne Bonus:</strong> ${netradyneBonus} (Paid quarterly)</li>
@@ -170,6 +219,7 @@ export default function App() {
         <details className="mb-2">
           <summary className="cursor-pointer font-medium">Performance Grade (A–F)</summary>
           <p className="text-sm text-gray-600 mt-1">
+            Grades are calculated on a rolling 13-week basis.<br />
             A = 10 weeks @ 100%, rest ≥90%, 1 grace week ≥70%<br />
             B = 5 weeks @ 100%, rest ≥90%, 1 grace ≥70% or all 13 ≥90%<br />
             C = Catch-all<br />
@@ -181,26 +231,19 @@ export default function App() {
           <summary className="cursor-pointer font-medium">Weekly Rating Definitions</summary>
           <p className="text-sm text-gray-600 mt-1">
             Perfect = Total score of 100% + No Flags<br />
-            Meets = Total score 83–99% and no major flag, or 100% with a minor flag<br />
-            Needs Improvement = Total score 70–82.99%, or 83–99% with minor flags<br />
-            Action Required = Total score &lt;70%, or any score with 3+ minor flags or one major flag
+            Meets = Score 83–99% and no major flag, or 100% with a minor flag<br />
+            Needs Improvement = 70–82.99%, or 83–99% with minor flags<br />
+            Action Required = &lt;70%, or any score with 3+ minor flags or 1 major flag
           </p>
         </details>
         <details className="mb-2">
           <summary className="cursor-pointer font-medium">Call-out Penalties</summary>
           <p className="text-sm text-gray-600 mt-1">
-            • Block-level callout = -10 points (1 instance over 2 weeks)<br />
-            • 2+ block callouts = -15 points<br />
-            • Load-level callout = -17.1 points (1 instance)<br />
-            • 2+ load-level = -20 points<br />
-            These penalties last for 6 weeks and reduce your Total Score during that time.
-          </p>
-        </details>
-        <details className="mb-2">
-          <summary className="cursor-pointer font-medium">Scorecard Tolerance Rules</summary>
-          <p className="text-sm text-gray-600 mt-1">
-            If your Netradyne score is 950+, you may qualify for Meets Rating with slightly lower On-time (97.5%).<br />
-            A perfect 1000 Netradyne score may allow 97.0% On-time while still qualifying.
+            • Block-level callout = minus 10 points (1 instance across 2 weeks)<br />
+            • 2+ block callouts = minus 15 points<br />
+            • Load-level callout = minus 17.1 points (1 instance across 6 weeks)<br />
+            • 2+ load-level = minus 20 points<br />
+            Block callout penalties last 2 weeks; Load penalties last 6 weeks.
           </p>
         </details>
         <a
