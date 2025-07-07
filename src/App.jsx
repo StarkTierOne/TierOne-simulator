@@ -176,9 +176,27 @@ export default function App() {
           <option>F</option>
         </select>
 
-        <div className=\"mb-4\">
-  <label className=\"block text-sm font-medium mb-1\">Enable S-Tier (Perfect only)</label>
-  <input type=\"checkbox\" checked=\{sTier\} disabled=\{rating !== \"Perfect\"\} onChange=\{\(e\) => setSTier\(e.target.checked\)\} />
+  <div className="mb-6">
+  <label className="block text-sm font-medium mb-2">Enable S-Tier (Perfect only)</label>
+  <div className="flex items-center space-x-4">
+    <label className="relative inline-flex items-center cursor-pointer">
+      <input
+        type="checkbox"
+        className="sr-only peer"
+        checked={sTier}
+        disabled={rating !== "Perfect"}
+        onChange={(e) => setSTier(e.target.checked)}
+      />
+      <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-green-500 peer-disabled:opacity-40 transition-colors duration-200"></div>
+    </label>
+    <span className="text-sm text-gray-700">
+      {rating !== "Perfect"
+        ? "S-Tier requires a Perfect rating"
+        : sTier
+        ? "✅ S-Tier enabled — top pay unlocked"
+        : "You qualify! Enable to access top pay band"}
+    </span>
+  </div>
 </div>
 
         <label>Years at Stark</label>
