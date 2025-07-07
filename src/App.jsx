@@ -176,10 +176,10 @@ export default function App() {
           <option>F</option>
         </select>
 
-        <label className="flex items-center space-x-2">
-          <input type="checkbox" checked={sTier} disabled={rating !== "Perfect"} onChange={(e) => setSTier(e.target.checked)} />
-          <span>Enable S-Tier (Perfect only)</span>
-        </label>
+        <div className=\"mb-4\">
+  <label className=\"block text-sm font-medium mb-1\">Enable S-Tier (Perfect only)</label>
+  <input type=\"checkbox\" checked=\{sTier\} disabled=\{rating !== \"Perfect\"\} onChange=\{\(e\) => setSTier\(e.target.checked\)\} />
+</div>
 
         <label>Years at Stark</label>
         <select value={tenure} onChange={(e) => setTenure(e.target.value)} className="p-2 border rounded w-full">
@@ -279,7 +279,7 @@ export default function App() {
   <details className="border rounded p-3">
     <summary className="font-medium cursor-pointer">How is Weekly Rating determined?</summary>
     <p className="mt-2 text-sm text-gray-700">
-      Weekly Rating reflects how you performed this week — it's based on your Total Score plus any safety or attendance flags.
+      Weekly Rating reflects how you performed this week — it's based on your Total Score plus any safety, attendance, or behavioral flags.
       <br /><br />
       <strong>Perfect:</strong> 100% score with zero flags<br />
       <strong>Meets Requirements:</strong> 83–99% with no major flags, or 100% with 1 minor flag<br />
