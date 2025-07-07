@@ -129,71 +129,90 @@ export default function App() {
         : 10
       : 0;
 
-  const dropdownField = (label, value, setter, options) => (
-    <div>
-      <label className="text-sm font-medium text-gray-600 mb-1">{label}</label>
-      <select value={value} onChange={(e) => setter(e.target.value)} className="p-2 border rounded w-full">
-        <option value="">{`Select ${label}`}</option>
-        {options.map((opt) => (
-          <option key={opt} value={opt}>
-            {opt}
-          </option>
-        ))}
-      </select>
-      {value && <p className="text-xs text-gray-500 mt-1">Selected: {value}</p>}
-    </div>
-  );
-
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-6 max-w-xl mx-auto">
       <h1 className="text-3xl font-bold mb-6">TierOne Bonus Simulator</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        {dropdownField("Role", role, setRole, ["Driver", "Trainer", "Supervisor"])}
-        {dropdownField("Amazon Scorecard", scorecard, setScorecard, [
-          "Fantastic Plus",
-          "Fantastic",
-          "Good",
-          "Fair",
-          "Poor",
-        ])}
-        {dropdownField("Weekly Rating", rating, setRating, [
-          "Perfect",
-          "Meets",
-          "Needs Improvement",
-          "Action Required",
-        ])}
-        {dropdownField("Tier Grade", tier, setTier, ["A", "B", "C", "D", "F"])}
-        {dropdownField("Tenure (Years)", tenure, setTenure, ["<1", "1", "2", "3", "4", "5+"])}
-        {dropdownField("Netradyne Status", netradyne, setNetradyne, ["Gold", "Silver", "None"])}
-        <div className="flex items-center space-x-2 mt-2">
+      <div className="space-y-4 mb-6">
+        <select value={role} onChange={(e) => setRole(e.target.value)} className="p-2 border rounded w-full">
+          <option value="">Select Role</option>
+          <option>Driver</option>
+          <option>Trainer</option>
+          <option>Supervisor</option>
+        </select>
+
+        <select value={scorecard} onChange={(e) => setScorecard(e.target.value)} className="p-2 border rounded w-full">
+          <option value="">Amazon Scorecard</option>
+          <option>Fantastic Plus</option>
+          <option>Fantastic</option>
+          <option>Good</option>
+          <option>Fair</option>
+          <option>Poor</option>
+        </select>
+
+        <select value={rating} onChange={(e) => setRating(e.target.value)} className="p-2 border rounded w-full">
+          <option value="">Weekly Rating</option>
+          <option>Perfect</option>
+          <option>Meets</option>
+          <option>Needs Improvement</option>
+          <option>Action Required</option>
+        </select>
+
+        <select value={tier} onChange={(e) => setTier(e.target.value)} className="p-2 border rounded w-full">
+          <option value="">Tier Grade</option>
+          <option>A</option>
+          <option>B</option>
+          <option>C</option>
+          <option>D</option>
+          <option>F</option>
+        </select>
+
+        <select value={tenure} onChange={(e) => setTenure(e.target.value)} className="p-2 border rounded w-full">
+          <option value="">Years at Stark</option>
+          <option>&lt;1</option>
+          <option>1</option>
+          <option>2</option>
+          <option>3</option>
+          <option>4</option>
+          <option>5+</option>
+        </select>
+
+        <select value={netradyne} onChange={(e) => setNetradyne(e.target.value)} className="p-2 border rounded w-full">
+          <option value="">Netradyne Status</option>
+          <option>Gold</option>
+          <option>Silver</option>
+          <option>None</option>
+        </select>
+
+        <label className="flex items-center space-x-2">
           <input
             type="checkbox"
             checked={sTier}
             disabled={rating !== "Perfect"}
             onChange={(e) => setSTier(e.target.checked)}
           />
-          <label className="text-sm">Enable S-Tier (Perfect only)</label>
-        </div>
+          <span>S-Tier (Perfect only)</span>
+        </label>
+
         <input
           type="number"
           placeholder="Total Hours Worked"
           value={hours}
           onChange={(e) => setHours(e.target.value)}
-          className="p-2 border rounded"
+          className="p-2 border rounded w-full"
         />
+
         {role !== "Driver" && (
           <input
             type="number"
             placeholder="Base Pay (e.g. 28)"
             value={baseRate}
             onChange={(e) => setBaseRate(e.target.value)}
-            className="p-2 border rounded"
+            className="p-2 border rounded w-full"
           />
         )}
       </div>
 
-      {/* Bonus Results */}
       <div className="bg-blue-50 p-6 rounded-lg shadow mb-8">
         <h2 className="text-xl font-semibold mb-4">Bonus Results</h2>
         {!result ? (
