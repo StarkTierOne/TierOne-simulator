@@ -260,44 +260,85 @@ export default function App() {
       )}
 
       <div className="mt-10 space-y-4">
-        <h2 className="text-xl font-semibold text-center">Frequently Asked Questions</h2>
+  <h2 className="text-xl font-semibold text-center">Frequently Asked Questions</h2>
 
-        <details className="border rounded p-3">
-          <summary className="font-medium cursor-pointer">Performance Grade (A–F)</summary>
-          <p className="mt-2 text-sm text-gray-700">
-            A = 10 weeks at 100%, rest ≥90%, 1 grace week ≥70%<br />
-            B = 5 weeks at 100%, rest ≥90%, 1 grace ≥70% or all 13 weeks ≥90%<br />
-            C = Catch-all<br />
-            D = 2+ weeks below 70% or 6+ weeks between 70–83%<br />
-            F = 5+ weeks below 70% or 13 weeks between 70–83%
-          </p>
-        </details>
+  <details className="border rounded p-3">
+    <summary className="font-medium cursor-pointer">What is a Performance Grade (A–F)?</summary>
+    <p className="mt-2 text-sm text-gray-700">
+      Your Performance Grade is based on your last 13 weeks of overall Total Score.
+      <br /><br />
+      <strong>A Grade:</strong> 10 weeks at 100%, rest at 90%+, 1 grace week at 70%+<br />
+      <strong>B Grade:</strong> 5 weeks at 100%, rest at 90%+, 1 grace week at 70%+ or all 13 weeks at 90%+<br />
+      <strong>C Grade:</strong> All other valid combinations<br />
+      <strong>D Grade:</strong> 2+ weeks below 70% or 6+ weeks between 70–83%<br />
+      <strong>F Grade:</strong> 5+ weeks below 70% or all 13 weeks between 70–83%<br /><br />
+      Grades determine your bonus eligibility and which payband you qualify for.
+    </p>
+  </details>
 
-        <details className="border rounded p-3">
-          <summary className="font-medium cursor-pointer">Weekly Rating Definitions</summary>
-          <p className="mt-2 text-sm text-gray-700">
-            Perfect = 100% + No Flags<br />
-            Meets Requirements = 83–99% and no major flag, or 100% with a minor flag<br />
-            Needs Improvement = 70–82.99%, or 83–99% with minor flags<br />
-            Action Required = &lt;70%, or any score with 3+ minor flags or 1 major flag
-          </p>
-        </details>
+  <details className="border rounded p-3">
+    <summary className="font-medium cursor-pointer">How is Weekly Rating determined?</summary>
+    <p className="mt-2 text-sm text-gray-700">
+      Weekly Rating reflects how you performed this week — it's based on your Total Score plus any safety or attendance flags.
+      <br /><br />
+      <strong>Perfect:</strong> 100% score with zero flags<br />
+      <strong>Meets Requirements:</strong> 83–99% with no major flags, or 100% with 1 minor flag<br />
+      <strong>Needs Improvement:</strong> 70–82.99%, or 83–99% with minor flags<br />
+      <strong>Action Required:</strong> Less than 70%, or any score with 3+ minor flags or 1 major flag<br /><br />
+      Only Perfect and Meets Requirements are eligible for bonus.
+    </p>
+  </details>
 
-        <details className="border rounded p-3">
-          <summary className="font-medium cursor-pointer">Call-out Penalties</summary>
-          <p className="mt-2 text-sm text-gray-700">
-            • Block-level callout = minus 10 points (1 instance over 2 weeks)<br />
-            • 2+ block callouts = minus 15 points<br />
-            • Load-level callout = minus 17.1 points (1 instance over 6 weeks)<br />
-            • 2+ load-level = minus 20 points<br />
-            Block penalties last 2 weeks, load penalties last 6 weeks.
-          </p>
-        </details>
+  <details className="border rounded p-3">
+    <summary className="font-medium cursor-pointer">What are Call-out Penalties?</summary>
+    <p className="mt-2 text-sm text-gray-700">
+      Call-outs directly reduce your Total Score and affect both Weekly Rating and Grade.
+      <br /><br />
+      • <strong>Block-level Callout:</strong> -10 points (1 instance in 2 weeks)<br />
+      • <strong>2+ Block Callouts:</strong> -15 points<br />
+      • <strong>Load-level Callout:</strong> -17.1 points (1 instance in 6 weeks)<br />
+      • <strong>2+ Load Callouts:</strong> -20 points<br /><br />
+      Block-level penalties last for 2 weeks. Load-level penalties last for 6 weeks. They affect bonus eligibility and can drop you to NI or AR.
+    </p>
+  </details>
 
-        <a href="https://drive.google.com/file/d/1CWVesfvKWsSFn7wv7bGvHv6kLb20Mzec/view?usp=sharing" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-sm inline-block">
-          📘 View Full Explainer PDF →
-        </a>
-      </div>
-    </div>
-  );
+  <details className="border rounded p-3">
+    <summary className="font-medium cursor-pointer">What is S-Tier?</summary>
+    <p className="mt-2 text-sm text-gray-700">
+      S-Tier is a special performance tier reserved for drivers who achieve <strong>13 consecutive Perfect weeks</strong>.
+      <br /><br />
+      Once unlocked, S-Tier grants access to the 5+ year payband — even if you haven't reached 5 years of tenure yet. However, you must maintain Perfect rating to stay in S-Tier.
+    </p>
+  </details>
+
+  <details className="border rounded p-3">
+    <summary className="font-medium cursor-pointer">What disqualifies me from getting a bonus?</summary>
+    <p className="mt-2 text-sm text-gray-700">
+      You may be disqualified if:
+      <br /><br />
+      • Your Weekly Rating is NI or AR<br />
+      • You receive a major safety flag (e.g., camera, following distance, seatbelt)<br />
+      • You fail to meet Grade + Tenure + Scorecard thresholds for your payband<br />
+      • You have a recent severe event that disqualifies you from Netradyne bonus
+    </p>
+  </details>
+
+  <details className="border rounded p-3">
+    <summary className="font-medium cursor-pointer">How does the Netradyne Bonus work?</summary>
+    <p className="mt-2 text-sm text-gray-700">
+      The Netradyne Bonus is a separate quarterly incentive based on camera safety scores.
+      <br /><br />
+      • Stark must earn Gold or Silver on Amazon's safety score<br />
+      • You must have a Perfect or Meets Requirements rating<br />
+      • You must not have any major camera flags or severe events in the last 6 weeks<br /><br />
+      If eligible, your Netradyne bonus accrues weekly and is paid out in a lump sum at the end of each quarter.
+    </p>
+  </details>
+
+  <a href="https://drive.google.com/file/d/1CWVesfvKWsSFn7wv7bGvHv6kLb20Mzec/view?usp=sharing" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-sm inline-block">
+    📘 View Full Explainer PDF →
+  </a>
+</div>
+</div>
+);
 }
