@@ -1,3 +1,7 @@
+// ✅ Full top-to-bottom layout for TierOne Bonus Simulator
+// ✅ Starts with Role, then Scorecard, Rating, Performance Grade, S-Tier, Tenure, Hours, Base Pay
+// ✅ Bonus Results + Netradyne Section + FAQ preserved
+
 import React, { useState, useEffect } from "react";
 
 export default function App() {
@@ -18,8 +22,77 @@ export default function App() {
   }, [rating]);
 
   const BONUS_MATRIX = {
-    // All Amazon rating levels and mappings go here (same structure as before)
-  };
+  "Fantastic Plus": {
+    Perfect: {
+      A: [26, 27, 28, 29, 30, 32],
+      B: [25, 26, 27, 28, 29, 30],
+      C: [24.75, 25, 25.25, 25.5, 25.75, 26],
+      "D & F": [24],
+    },
+    "Meets Requirements": {
+      A: [25, 26, 27, 28, 29, 30],
+      B: [24.5, 25, 25.5, 26, 26.5, 27],
+      C: [24.25, 24.5, 24.75, 25, 25.25, 25.5],
+      "D & F": [24],
+    },
+  },
+  Fantastic: {
+    Perfect: {
+      A: [25, 26, 27, 28, 29, 30],
+      B: [24.5, 25, 26, 27, 28, 29],
+      C: [24.25, 24.5, 24.75, 25, 25.25, 25.5],
+      "D & F": [24],
+    },
+    "Meets Requirements": {
+      A: [24.5, 25.5, 26, 26.5, 27, 28],
+      B: [24.25, 24.5, 25, 25.5, 26, 26.5],
+      C: [24, 24.25, 24.5, 24.75, 25, 25.25],
+      "D & F": [24],
+    },
+  },
+  Good: {
+    Perfect: {
+      A: [24.5, 25, 25.5, 26, 26.5, 27],
+      B: [24.25, 24.5, 25, 25.5, 26, 26.5],
+      C: [24, 24.25, 24.5, 24.75, 25, 25.25],
+      "D & F": [24],
+    },
+    "Meets Requirements": {
+      A: [24.25, 24.5, 25, 25.25, 25.5, 25.75],
+      B: [24, 24.25, 24.5, 24.75, 25, 25.25],
+      C: [24, 24, 24, 24, 24, 24],
+      "D & F": [24],
+    },
+  },
+  Fair: {
+    Perfect: {
+      A: [24.25, 24.5, 25, 25.25, 25.5, 25.75],
+      B: [24, 24.25, 24.5, 24.75, 25, 25.25],
+      C: [24, 24, 24, 24, 24, 24],
+      "D & F": [24],
+    },
+    "Meets Requirements": {
+      A: [24, 24.25, 24.5, 24.75, 25, 25.25],
+      B: [24, 24, 24, 24, 24, 24],
+      C: [24, 24, 24, 24, 24, 24],
+      "D & F": [24],
+    },
+  },
+  Poor: {
+    Perfect: {
+      A: [24, 24, 24, 24, 24, 24],
+      B: [24, 24, 24, 24, 24, 24],
+      C: [24, 24, 24, 24, 24, 24],
+      "D & F": [24],
+    },
+    "Meets Requirements": {
+      A: [24, 24, 24, 24, 24, 24],
+      B: [24, 24, 24, 24, 24, 24],
+      C: [24, 24, 24, 24, 24, 24],
+      "D & F": [24],
+    },
+  },
+};
 
   const getTenureIndex = () => {
     if (sTier && scorecard === "Fantastic Plus") return 5;
