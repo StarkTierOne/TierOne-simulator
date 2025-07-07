@@ -176,13 +176,36 @@ export default function App() {
           <option>F</option>
         </select>
 
- <span className="text-sm text-gray-700">
-  {rating !== "Perfect"
-    ? "S-Tier requires a Perfect rating"
-    : sTier
-    ? "✅ S-Tier enabled — top pay unlocked"
-    : "Have you been Perfect for 13 weeks straight? Toggle to unlock S-Tier status and earn top-tier pay."}
-</span>
+ <div className="mb-6">
+  <label className="block text-sm font-medium mb-2">S-Tier Status</label>
+  <div className="flex items-center space-x-4">
+    <button
+      type="button"
+      disabled={rating !== "Perfect"}
+      onClick={() => setSTier(!sTier)}
+      className={`relative inline-flex items-center h-6 rounded-full w-11 transition-colors ${
+        rating !== "Perfect"
+          ? "bg-gray-300 cursor-not-allowed"
+          : sTier
+          ? "bg-green-500"
+          : "bg-gray-300"
+      }`}
+    >
+      <span
+        className={`inline-block w-5 h-5 transform bg-white rounded-full transition-transform ${
+          sTier ? "translate-x-5" : "translate-x-1"
+        }`}
+      />
+    </button>
+    <span className="text-sm text-gray-700 max-w-xs">
+      {rating !== "Perfect"
+        ? "S-Tier is locked. Requires a Perfect rating."
+        : sTier
+        ? "✅ S-Tier enabled — you're now on track for top pay."
+        : "Have you been Perfect for 13 weeks in a row? Toggle to enable S-Tier status and unlock 5+ year pay."}
+    </span>
+  </div>
+</div>
 
         <label>Years at Stark</label>
         <select value={tenure} onChange={(e) => setTenure(e.target.value)} className="p-2 border rounded w-full">
