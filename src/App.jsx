@@ -1,3 +1,7 @@
+// ✅ Restored and Complete TierOne Bonus Simulator
+// Includes: full BONUS_MATRIX, FAQ (escaped), all inputs, calculations, and logic
+// This version is JSX-safe and Vercel-ready
+
 import React, { useState, useEffect } from "react";
 
 export default function TierOneBonusSimulator() {
@@ -23,9 +27,7 @@ export default function TierOneBonusSimulator() {
     setCheckND(false); setHours(""); setBaseRate("");
   };
 
-  const printResults = () => {
-    window.print();
-  };
+  const printResults = () => window.print();
 
   const BONUS_MATRIX = {
     "Fantastic Plus": {
@@ -91,17 +93,18 @@ export default function TierOneBonusSimulator() {
     <div className="p-6 max-w-3xl mx-auto font-sans">
       <h1 className="text-4xl font-bold text-center mb-8">TierOne Bonus Simulator</h1>
 
-      {/* Inputs */}
       <div className="space-y-4 bg-white p-6 rounded shadow-md">
+        <label>Role</label>
         <select value={role} onChange={(e) => setRole(e.target.value)} className="p-2 border rounded w-full">
-          <option value="">-- Select Role --</option>
+          <option value="">--</option>
           <option>Driver</option>
           <option>Trainer</option>
           <option>Supervisor</option>
         </select>
 
+        <label>Amazon Scorecard</label>
         <select value={scorecard} onChange={(e) => setScorecard(e.target.value)} className="p-2 border rounded w-full">
-          <option value="">-- Amazon Scorecard --</option>
+          <option value="">--</option>
           <option>Fantastic Plus</option>
           <option>Fantastic</option>
           <option>Good</option>
@@ -109,60 +112,78 @@ export default function TierOneBonusSimulator() {
           <option>Poor</option>
         </select>
 
+        <label>Weekly Rating</label>
         <select value={rating} onChange={(e) => setRating(e.target.value)} className="p-2 border rounded w-full">
-          <option value="">-- Weekly Rating --</option>
+          <option value="">--</option>
           <option>Perfect</option>
           <option>Meets Requirements</option>
           <option>Needs Improvement</option>
           <option>Action Required</option>
         </select>
 
-        <div className="grid sm:grid-cols-2 gap-4">
-          <select value={tier} onChange={(e) => setTier(e.target.value)} className="p-2 border rounded w-full">
-            <option value="">-- Performance Grade --</option>
-            <option>A</option><option>B</option><option>C</option><option>D</option><option>F</option>
-          </select>
-          <select value={tenure} onChange={(e) => setTenure(e.target.value)} className="p-2 border rounded w-full">
-            <option value="">-- Years at Stark --</option>
-            <option>&lt;1</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5+</option>
-          </select>
-        </div>
+        <label>Performance Grade</label>
+        <select value={tier} onChange={(e) => setTier(e.target.value)} className="p-2 border rounded w-full">
+          <option value="">--</option>
+          <option>A</option>
+          <option>B</option>
+          <option>C</option>
+          <option>D</option>
+          <option>F</option>
+        </select>
+
+        <label>Years at Stark</label>
+        <select value={tenure} onChange={(e) => setTenure(e.target.value)} className="p-2 border rounded w-full">
+          <option value="">--</option>
+          <option>&lt;1</option>
+          <option>1</option>
+          <option>2</option>
+          <option>3</option>
+          <option>4</option>
+          <option>5+</option>
+        </select>
 
         <label className="flex items-center space-x-2">
-          <input type="checkbox" checked={sTier} onChange={(e) => setSTier(e.target.checked)} disabled={rating !== "Perfect"} />
+          <input type="checkbox" checked={sTier} onChange={(e) => setSTier(e.target.checked)} disabled={rating !== "Perfect"} className="w-5 h-5" />
           <span>S-Tier (13 Perfect Weeks)</span>
         </label>
 
+        <label>Total Hours Worked</label>
         <input type="number" value={hours} onChange={(e) => setHours(e.target.value)} placeholder="e.g. 38.5" className="p-2 border rounded w-full" />
 
         {role !== "Driver" && (
-          <input type="number" value={baseRate} onChange={(e) => setBaseRate(e.target.value)} placeholder="e.g. 27" className="p-2 border rounded w-full" />
+          <>
+            <label>Base Pay</label>
+            <input type="number" value={baseRate} onChange={(e) => setBaseRate(e.target.value)} placeholder="e.g. 27" className="p-2 border rounded w-full" />
+          </>
         )}
 
         <label className="flex items-center space-x-2">
-          <input type="checkbox" checked={checkND} onChange={(e) => setCheckND(e.target.checked)} />
+          <input type="checkbox" checked={checkND} onChange={(e) => setCheckND(e.target.checked)} className="w-5 h-5" />
           <span>📸 Check Netradyne Bonus</span>
         </label>
 
         {checkND && (
           <div className="bg-green-50 p-4 rounded-lg">
+            <label>Netradyne Status</label>
             <select value={netradyne} onChange={(e) => setNetradyne(e.target.value)} className="p-2 border rounded w-full mb-2">
-              <option value="">-- Netradyne Status --</option>
+              <option value="">--</option>
               <option>Gold</option>
               <option>Silver</option>
               <option>None</option>
             </select>
+
+            <label>Any Severe Events in Last 6 Weeks?</label>
             <select value={severeEvent} onChange={(e) => setSevereEvent(e.target.value)} className="p-2 border rounded w-full mb-2">
-              <option value="">-- Severe Event in 6 Weeks? --</option>
+              <option value="">--</option>
               <option>No</option>
               <option>Yes</option>
             </select>
+
             <p><strong>Bonus (if eligible):</strong> ${netradyneBonus}</p>
           </div>
         )}
       </div>
 
-      {/* Results */}
       <div className="bg-blue-50 p-6 mt-6 rounded shadow-md">
         <h2 className="text-xl font-bold mb-4">Bonus Results</h2>
         {!result ? (
@@ -184,55 +205,51 @@ export default function TierOneBonusSimulator() {
         </div>
       </div>
 
-      {/* FAQ */}
-<div className="mt-10 space-y-4 text-sm leading-relaxed">
-  <h2 className="text-xl font-semibold text-center mb-4">Frequently Asked Questions</h2>
-
-  <details className="border rounded p-3">
-    <summary className="font-medium cursor-pointer">What is a Performance Grade (A–F)?</summary>
-    <p className="mt-2 text-gray-700">
-      A = 10 weeks at 100%, rest ≥90%, 1 grace week ≥70%<br />
-      B = 5 weeks at 100%, rest ≥90%, 1 grace week ≥70% or all 13 weeks ≥90%<br />
-      C = All other valid combinations<br />
-      D = 2+ weeks &lt;70% or 6+ weeks between 70–83%<br />
-      F = 5+ weeks &lt;70% or all 13 weeks between 70–83%
-    </p>
-  </details>
-
-  <details className="border rounded p-3">
-    <summary className="font-medium cursor-pointer">How is Weekly Rating determined?</summary>
-    <p className="mt-2 text-gray-700">
-      Perfect: 100% score, no flags<br />
-      Meets: 83–99% + no major flags or 100% + 1 minor flag<br />
-      NI: 70–82.99% or 83–99% with minor flags<br />
-      AR: &lt;70% or 3+ minor flags or any major flag
-    </p>
-  </details>
-
-  <details className="border rounded p-3">
-    <summary className="font-medium cursor-pointer">What disqualifies me from bonuses?</summary>
-    <p className="mt-2 text-gray-700">
-      • Rating is NI or AR<br />
-      • Major camera flag<br />
-      • Didn’t meet Grade/Tenure/Scorecard threshold<br />
-      • Recent severe event
-    </p>
-  </details>
-
-  <details className="border rounded p-3">
-    <summary className="font-medium cursor-pointer">What is S-Tier?</summary>
-    <p className="mt-2 text-gray-700">
-      13 Perfect weeks in a row. Unlocks 5-year bonus rate. Must maintain Perfect to stay in.
-    </p>
-  </details>
-
-  <details className="border rounded p-3">
-    <summary className="font-medium cursor-pointer">How does the Netradyne Bonus work?</summary>
-    <p className="mt-2 text-gray-700">
-      • Stark must earn Gold or Silver<br />
-      • Rating = Perfect or Meets<br />
-      • No severe events<br />
-      Bonus accrues weekly and is paid at quarter-end
-    </p>
-  </details>
-</div>
+      <div className="mt-10 space-y-4 text-sm leading-relaxed">
+        <h2 className="text-xl font-semibold text-center mb-4">Frequently Asked Questions</h2>
+        <details className="border rounded p-3">
+          <summary className="font-medium cursor-pointer">What is a Performance Grade (A–F)?</summary>
+          <p className="mt-2 text-gray-700">
+            A = 10 weeks at 100%, rest ≥90%, 1 grace week ≥70%<br />
+            B = 5 weeks at 100%, rest ≥90%, 1 grace week ≥70% or all 13 weeks ≥90%<br />
+            C = All other valid combinations<br />
+            D = 2+ weeks &lt;70% or 6+ weeks between 70–83%<br />
+            F = 5+ weeks &lt;70% or all 13 weeks between 70–83%
+          </p>
+        </details>
+        <details className="border rounded p-3">
+          <summary className="font-medium cursor-pointer">How is Weekly Rating determined?</summary>
+          <p className="mt-2 text-gray-700">
+            Perfect: 100% score, no flags<br />
+            Meets: 83–99% + no major flags or 100% + 1 minor flag<br />
+            NI: 70–82.99% or 83–99% with minor flags<br />
+            AR: &lt;70% or 3+ minor flags or any major flag
+          </p>
+        </details>
+        <details className="border rounded p-3">
+          <summary className="font-medium cursor-pointer">What disqualifies me from bonuses?</summary>
+          <p className="mt-2 text-gray-700">
+            • Rating is NI or AR<br />
+            • Major camera flag<br />
+            • Didn’t meet Grade/Tenure/Scorecard threshold<br />
+            • Recent severe event
+          </p>
+        </details>
+        <details className="border rounded p-3">
+          <summary className="font-medium cursor-pointer">What is S-Tier?</summary>
+          <p className="mt-2 text-gray-700">
+            13 Perfect weeks in a row. Unlocks 5-year bonus rate. Must maintain Perfect to stay in.
+          </p>
+        </details>
+        <details className="border rounded p-3">
+          <summary className="font-medium cursor-pointer">How does the Netradyne Bonus work?</summary>
+          <p className="mt-2 text-gray-700">
+            • Stark must earn Gold or Silver<br />
+            • Rating = Perfect or Meets<br />
+            • No severe events<br />
+            Bonus accrues weekly and is paid at quarter-end
+          </p>
+        </details>
+      </div>
+    </div>
+  );
