@@ -310,3 +310,5 @@ export default function App() {
     📘 View Full Explainer PDF →
   </a>
 </div>
+);
+}
