@@ -58,7 +58,6 @@ export default function App() {
   const [lunchRate, setLunchRate] = useState("");
   const [showLunchExp, setShowLunchExp] = useState(false);
 
-  // Reset S-Tier if rating changes
   useEffect(() => {
     if (rating !== "Perfect") setSTier(false);
   }, [rating]);
@@ -87,40 +86,46 @@ export default function App() {
     return { hourly: Math.min(rate,32), bonusOnly: (Math.min(rate,32)-24).toFixed(2) };
   };
 
-  // Memoized calcs
+  // Calculations
   const result = useMemo(() => getBonusRate(), [scorecard, rating, tier, tenure, sTier]);
   const hourlyBonus = result ? parseFloat(result.bonusOnly) : 0;
   const totalH = parseFloat(hours || 0);
   const otH = totalH > 40 ? totalH - 40 : 0;
 
-  // 39-Hour Guarantee
-  const is39Eligible = rating === "Perfect"
-    && (parseInt(daysWorked,10) || 0) >= 3
-    && driverRejects === 0;
+  // 39-Hour Guarantee (Driver only)
+  const is39Eligible =
+    role === "Driver" &&
+    rating === "Perfect" &&
+    (parseInt(daysWorked,10) || 0) >= 3 &&
+    driverRejects === 0;
   const creditedHours39 = is39Eligible ? Math.max(totalH,39) : totalH;
 
-  // Paid Lunch Bonus
-  const lunchEligible = rating === "Perfect" && ["A","B"].includes(tier);
+  // Paid Lunch Bonus (Driver only)
+  const lunchEligible =
+    role === "Driver" &&
+    rating === "Perfect" &&
+    ["A","B"].includes(tier);
   const lunchAmt = lunchEligible
-    ? (parseInt(daysWorked,10) || 0) * (parseFloat(lunchRate)||0)
+    ? (parseInt(daysWorked,10) || 0) * (parseFloat(lunchRate) || 0)
     : 0;
 
-  // Base & totals
-  const base = role === "Driver" ? 24 : parseFloat(baseRate)||24;
+  // Base & Totals
+  const base = role === "Driver" ? 24 : parseFloat(baseRate) || 24;
   const newRate = (base + hourlyBonus).toFixed(2);
   const otPay = (base * 1.5 * otH).toFixed(2);
-  const weeklyBonus = (hourlyBonus * creditedHours39).toFixed(2);
+  const performanceBonusTotal = (hourlyBonus * totalH).toFixed(2);
+  const guaranteePay = (base * creditedHours39).toFixed(2);
   const baseOT = (base * creditedHours39 + parseFloat(otPay)).toFixed(2);
   const totalPay = (
-    (base + hourlyBonus) * creditedHours39
-    + parseFloat(otPay)
-    + lunchAmt
+    (base + hourlyBonus) * creditedHours39 +
+    parseFloat(otPay) +
+    lunchAmt
   ).toFixed(2);
 
-  // Netradyne bonus
+  // Netradyne Bonus
   const isEligible = ["Perfect","Meets Requirements"].includes(rating);
-  const qualifiesND = checkND && isEligible && netradyne!=="None" && severeEvent==="No";
-  const netBonus = qualifiesND ? (netradyne==="Gold"?20:10) : 0;
+  const qualifiesND = checkND && isEligible && netradyne !== "None" && severeEvent === "No";
+  const netBonus = qualifiesND ? (netradyne === "Gold" ? 20 : 10) : 0;
 
   return (
     <div className="p-8 max-w-3xl mx-auto font-sans space-y-8">
@@ -131,7 +136,7 @@ export default function App() {
         {/* Role */}
         <div>
           <label htmlFor="role" className="block font-medium mb-1">Role</label>
-          <select id="role" value={role} onChange={e=>setRole(e.target.value)} className="w-full border p-2 rounded">
+          <select id="role" value={role} onChange={e => setRole(e.target.value)} className="w-full border p-2 rounded">
             <option value="">-- Select role --</option>
             <option>Driver</option>
             <option>Trainer</option>
@@ -142,21 +147,21 @@ export default function App() {
         {/* Total Hours */}
         <div>
           <label htmlFor="hours" className="block font-medium mb-1">Total Hours Worked (Optional)</label>
-          <input id="hours" type="number" value={hours} onChange={e=>setHours(e.target.value)} placeholder="e.g. 38.5" className="w-full border p-2 rounded"/>
+          <input id="hours" type="number" value={hours} onChange={e => setHours(e.target.value)} placeholder="e.g. 38.5" className="w-full border p-2 rounded"/>
         </div>
 
         {/* Base Pay */}
-        {(role==="Trainer"||role==="Supervisor") && (
+        {(role === "Trainer" || role === "Supervisor") && (
           <div>
             <label htmlFor="baseRate" className="block font-medium mb-1">Base Pay (Optional)</label>
-            <input id="baseRate" type="number" value={baseRate} onChange={e=>setBaseRate(e.target.value)} placeholder="e.g. 27" className="w-full border p-2 rounded"/>
+            <input id="baseRate" type="number" value={baseRate} onChange={e => setBaseRate(e.target.value)} placeholder="e.g. 27" className="w-full border p-2 rounded"/>
           </div>
         )}
 
         {/* Scorecard */}
         <div>
           <label htmlFor="scorecard" className="block font-medium mb-1">Amazon Scorecard</label>
-          <select id="scorecard" value={scorecard} onChange={e=>setScorecard(e.target.value)} className="w-full border p-2 rounded">
+          <select id="scorecard" value={scorecard} onChange={e => setScorecard(e.target.value)} className="w-full border p-2 rounded">
             <option value="">-- Select scorecard --</option>
             <option>Fantastic Plus</option>
             <option>Fantastic</option>
@@ -169,7 +174,7 @@ export default function App() {
         {/* Rating */}
         <div>
           <label htmlFor="rating" className="block font-medium mb-1">Weekly Rating</label>
-          <select id="rating" value={rating} onChange={e=>setRating(e.target.value)} className="w-full border p-2 rounded">
+          <select id="rating" value={rating} onChange={e => setRating(e.target.value)} className="w-full border p-2 rounded">
             <option value="">-- Select rating --</option>
             <option>Perfect</option>
             <option>Meets Requirements</option>
@@ -181,75 +186,84 @@ export default function App() {
         {/* Grade */}
         <div>
           <label htmlFor="tier" className="block font-medium mb-1">Performance Grade</label>
-          <select id="tier" value={tier} onChange={e=>setTier(e.target.value)} className="w-full border p-2 rounded">
+          <select id="tier" value={tier} onChange={e => setTier(e.target.value)} className="w-full border p-2 rounded">
             <option value="">-- Select grade --</option>
-            <option>A</option><option>B</option><option>C</option><option>D</option><option>F</option>
+            <option>A</option>
+            <option>B</option>
+            <option>C</option>
+            <option>D</option>
+            <option>F</option>
           </select>
         </div>
 
         {/* Tenure */}
         <div>
           <label htmlFor="tenure" className="block font-medium mb-1">Years at Stark</label>
-          <select id="tenure" value={tenure} onChange={e=>setTenure(e.target.value)} className="w-full border p-2 rounded">
+          <select id="tenure" value={tenure} onChange={e => setTenure(e.target.value)} className="w-full border p-2 rounded">
             <option value="">-- Select tenure --</option>
-            <option>&lt;1</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5+</option>
+            <option>&lt;1</option>
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5+</option>
           </select>
         </div>
 
         {/* S-Tier */}
         <div className="flex items-center space-x-2">
-          <input type="checkbox" id="sTier" checked={sTier} onChange={e=>setSTier(e.target.checked)} disabled={rating!=="Perfect"} className="w-5 h-5"/>
+          <input type="checkbox" id="sTier" checked={sTier} onChange={e => setSTier(e.target.checked)} disabled={rating !== "Perfect"} className="w-5 h-5"/>
           <label htmlFor="sTier" className="font-medium">S-Tier (13 Perfect Weeks)</label>
         </div>
 
-        {/* Netradyne */}
+        {/* Netradyne Toggle */}
         <div className="flex items-center space-x-2">
-          <input type="checkbox" id="ndToggle" checked={checkND} onChange={e=>setCheckND(e.target.checked)} className="w-5 h-5"/>
+          <input type="checkbox" id="ndToggle" checked={checkND} onChange={e => setCheckND(e.target.checked)} className="w-5 h-5"/>
           <label htmlFor="ndToggle" className="font-medium">Would you like to check your Netradyne Bonus?</label>
         </div>
 
-        {/* 39-Hour Guarantee */}
-        {rating==="Perfect" && (
+        {/* 39-Hour Guarantee Inputs (Driver only) */}
+        {role === "Driver" && rating === "Perfect" && (
           <div className="space-y-4">
             <h3 className="font-semibold">39-Hour Guarantee</h3>
-            <button type="button" aria-expanded={show39Exp} aria-controls="info-39" className="font-medium" onClick={()=>setShow39Exp(!show39Exp)}>
+            <button type="button" className="font-medium" onClick={() => setShow39Exp(!show39Exp)}>
               What’s the 39-Hour Guarantee? {show39Exp ? "▲" : "▼"}
             </button>
             {show39Exp && (
-              <div id="info-39" className="text-sm pl-4">
+              <div className="text-sm pl-4">
                 If you have a Perfect rating, work at least 3 days, and have zero driver-initiated rejects, we’ll credit you up to 39 hours at your base rate even if you actually worked fewer.
               </div>
             )}
             <div>
               <label htmlFor="daysWorked" className="block font-medium mb-1">Days Worked This Week</label>
-              <input id="daysWorked" type="number" min="0" max="7" value={daysWorked} onChange={e=>setDaysWorked(e.target.value)} className="w-full border p-2 rounded"/>
+              <input id="daysWorked" type="number" min="0" max="7" value={daysWorked} onChange={e => setDaysWorked(e.target.value)} className="w-full border p-2 rounded"/>
             </div>
             <div>
               <label htmlFor="driverRejects" className="block font-medium mb-1">Driver-Rejected Legs</label>
-              <input id="driverRejects" type="number" min="0" value={driverRejects} onChange={e=>setDriverRejects(parseInt(e.target.value,10)||0)} className="w-full border p-2 rounded"/>
+              <input id="driverRejects" type="number" min="0" value={driverRejects} onChange={e => setDriverRejects(parseInt(e.target.value,10)||0)} className="w-full border p-2 rounded"/>
             </div>
             <div>
               <label htmlFor="amazonRejects" className="block font-medium mb-1">Amazon-Canceled Legs</label>
-              <input id="amazonRejects" type="number" min="0" value={amazonRejects} onChange={e=>setAmazonRejects(parseInt(e.target.value,10)||0)} className="w-full border p-2 rounded"/>
+              <input id="amazonRejects" type="number" min="0" value={amazonRejects} onChange={e => setAmazonRejects(parseInt(e.target.value,10)||0)} className="w-full border p-2 rounded"/>
             </div>
           </div>
         )}
 
-        {/* Paid Lunch Bonus */}
-        {rating==="Perfect" && ["A","B"].includes(tier) && (
+        {/* Paid Lunch Bonus Inputs (Driver only) */}
+        {role === "Driver" && lunchEligible && (
           <div className="space-y-4">
             <h3 className="font-semibold">Paid Lunch Bonus</h3>
-            <button type="button" aria-expanded={showLunchExp} aria-controls="info-lunch" className="font-medium" onClick={()=>setShowLunchExp(!showLunchExp)}>
+            <button type="button" className="font-medium" onClick={() => setShowLunchExp(!showLunchExp)}>
               What’s the Paid Lunch Bonus? {showLunchExp ? "▲" : "▼"}
             </button>
             {showLunchExp && (
-              <div id="info-lunch" className="text-sm pl-4">
-                As long as you have a Perfect rating and Grade A or B, you earn the daily lunch bonus for each day worked. Enter your per-day rate above.
+              <div className="text-sm pl-4">
+                As long as you have a Perfect rating and Grade A or B, you earn a lunch bonus for each day worked. Enter your per-day rate above.
               </div>
             )}
             <div>
               <label htmlFor="lunchRate" className="block font-medium mb-1">Lunch Bonus Rate ($/day)</label>
-              <input id="lunchRate" type="number" value={lunchRate} onChange={e=>setLunchRate(e.target.value)} placeholder="e.g. 5" className="w-full border p-2 rounded"/>
+              <input id="lunchRate" type="number" value={lunchRate} onChange={e => setLunchRate(e.target.value)} placeholder="e.g. 5" className="w-full border p-2 rounded"/>
             </div>
           </div>
         )}
@@ -262,22 +276,22 @@ export default function App() {
           <div className="space-y-4">
             <div>
               <label className="block font-medium mb-1">Netradyne Status</label>
-              <select value={netradyne} onChange={e=>setNetradyne(e.target.value)} className="w-full border p-2 rounded">
+              <select value={netradyne} onChange={e => setNetradyne(e.target.value)} className="w-full border p-2 rounded">
                 <option value="">--</option><option>Gold</option><option>Silver</option><option>None</option>
               </select>
             </div>
             <div>
               <label className="block font-medium mb-1">Any Severe Events in Last 6 Weeks?</label>
-              <select value={severeEvent} onChange={e=>setSevereEvent(e.target.value)} className="w-full border p-2 rounded">
+              <select value={severeEvent} onChange={e => setSevereEvent(e.target.value)} className="w-full border p-2 rounded">
                 <option value="">--</option><option>No</option><option>Yes</option>
               </select>
             </div>
             <p className="font-medium">Bonus (if eligible): <span className="text-lg">${netBonus}</span></p>
-            <button type="button" aria-expanded={showNDE} aria-controls="nd-explainer" className="font-semibold" onClick={()=>setShowNDE(!showNDE)}>
+            <button type="button" className="font-semibold" onClick={() => setShowNDE(!showNDE)}>
               Netradyne Bonus Explainer {showNDE ? "▲" : "▼"}
             </button>
             {showNDE && (
-              <div id="nd-explainer" role="region" className="text-sm pl-4">
+              <div className="text-sm pl-4">
                 The Netradyne Bonus is paid out quarterly if the company earns Gold or Silver status on Amazon's camera safety score. You must not have NI or AR ratings or receive major camera flags to qualify. If eligible, your bonus accrues weekly and is paid as a lump sum at the end of the quarter.
               </div>
             )}
@@ -285,38 +299,83 @@ export default function App() {
         </div>
       )}
 
-      {/* Bonus Results */}
-      <div className="bg-white p-6 rounded-lg shadow space-y-4">
+      {/* Grouped Bonus Results */}
+      <div className="bg-white p-6 rounded-lg shadow space-y-6">
         <h3 className="text-xl font-semibold mb-2">Bonus Results</h3>
-        <ul className="list-disc ml-6 space-y-1">
-          <li>Your Base Rate: ${base.toFixed(2)}</li>
-          <li>Hourly Bonus: +${hourlyBonus.toFixed(2)}/hr</li>
-          <li>New Hourly Rate: ${newRate}/hr</li>
-          <li>Overtime Pay: ${otPay}</li>
-          <li>Weekly Bonus Total: ${weeklyBonus}</li>
-          <li>Lunch Bonus Total: ${lunchAmt.toFixed(2)}</li>
-          <li>Total Pay (incl. OT & Lunch): ${totalPay}</li>
-        </ul>
+
+        {/* 1. Performance Bonus */}
+        <div>
+          <h4 className="font-medium">TierOne Performance Bonus</h4>
+          <ul className="list-disc ml-6 space-y-1">
+            <li>Hourly Bonus: +${hourlyBonus.toFixed(2)}/hr</li>
+            <li>Weekly Bonus Total: ${performanceBonusTotal}</li>
+          </ul>
+        </div>
+
+        {/* 2. 39-Hour Guarantee */}
+        {role === "Driver" && rating === "Perfect" && (
+          <div>
+            <h4 className="font-medium">39-Hour Guarantee</h4>
+            <ul className="list-disc ml-6 space-y-1">
+              <li>Credited Hours: {creditedHours39.toFixed(2)} hrs</li>
+              <li>Guarantee Pay (at base rate): ${guaranteePay}</li>
+            </ul>
+          </div>
+        )}
+
+        {/* 3. Paid Lunch Bonus */}
+        {role === "Driver" && lunchEligible && (
+          <div>
+            <h4 className="font-medium">Paid Lunch Bonus</h4>
+            <ul className="list-disc ml-6 space-y-1">
+              <li>Lunch Days: {parseInt(daysWorked,10)||0}</li>
+              <li>Lunch Bonus Total: ${lunchAmt.toFixed(2)}</li>
+            </ul>
+          </div>
+        )}
+
+        {/* 4. Netradyne Bonus */}
+        {checkND && (
+          <div>
+            <h4 className="font-medium">Netradyne Safety Bonus</h4>
+            <ul className="list-disc ml-6 space-y-1">
+              <li>Weekly Netradyne Bonus: ${netBonus}</li>
+            </ul>
+          </div>
+        )}
+
+        {/* 5. Totals & Overtime */}
+        <div>
+          <h4 className="font-medium">Totals & Overtime</h4>
+          <ul className="list-disc ml-6 space-y-1">
+            <li>New Hourly Rate: ${newRate}/hr</li>
+            <li>Overtime Pay: ${otPay}</li>
+            <li>Base Pay (incl. OT): ${baseOT}</li>
+            <li><strong>Total Weekly Pay:</strong> ${totalPay}</li>
+          </ul>
+        </div>
+
+        {/* Actions */}
         <div className="flex space-x-4">
-          <button type="button" onClick={resetForm} className="px-4 py-2 border rounded">Reset</button>
-          <button type="button" onClick={printResults} className="px-4 py-2 border rounded">Print</button>
+          <button onClick={resetForm} className="px-4 py-2 border rounded">Reset</button>
+          <button onClick={printResults} className="px-4 py-2 border rounded">Print</button>
         </div>
       </div>
 
       {/* FAQ */}
       <div className="space-y-4">
-        <button type="button" aria-expanded={showFAQ} aria-controls="faq-section" className="font-semibold" onClick={()=>setShowFAQ(!showFAQ)}>
+        <button onClick={() => setShowFAQ(!showFAQ)} className="font-semibold">
           Frequently Asked Questions {showFAQ ? "▲" : "▼"}
         </button>
         {showFAQ && (
-          <div id="faq-section" role="region" className="text-sm space-y-4 pl-4">
+          <div className="text-sm space-y-4 pl-4">
             {/* 1 */}
             <div>
-              <button type="button" aria-expanded={showPG} aria-controls="faq-pg" className="font-medium" onClick={()=>setShowPG(!showPG)}>
+              <button onClick={() => setShowPG(!showPG)} className="font-medium">
                 What is a Performance Grade (A–F)? {showPG ? "▲" : "▼"}
               </button>
               {showPG && (
-                <div id="faq-pg" role="region" className="mt-1">
+                <div className="mt-1">
                   <p>Your Performance Grade is based on your last 13 weeks of overall Total Score.</p>
                   <p><strong>A Grade:</strong> 10 weeks at 100%, rest at 90%+, 1 grace week at 70%+</p>
                   <p><strong>B Grade:</strong> 5 weeks at 100%, rest at 90%+, 1 grace week at 70%+ or all 13 weeks at 90%+</p>
@@ -328,12 +387,12 @@ export default function App() {
             </div>
             {/* 2 */}
             <div>
-              <button type="button" aria-expanded={showWR} aria-controls="faq-wr" className="font-medium" onClick={()=>setShowWR(!showWR)}>
+              <button onClick={() => setShowWR(!showWR)} className="font-medium">
                 How is Weekly Rating determined? {showWR ? "▲" : "▼"}
               </button>
               {showWR && (
-                <div id="faq-wr" role="region" className="mt-1">
-                  <p>Weekly Rating reflects how you performed this week — it's based on your Total Score plus any safety, attendance, or behavioral flags.</p>
+                <div className="mt-1">
+                  <p>Weekly Rating reflects your Total Score plus any safety, attendance, or behavioral flags.</p>
                   <p><strong>Perfect:</strong> 100% score with zero flags</p>
                   <p><strong>Meets Requirements:</strong> 83–99% with no major flags, or 100% with 1 minor flag</p>
                   <p><strong>Needs Improvement:</strong> 70–82.99%, or 83–99% with minor flags</p>
@@ -343,68 +402,69 @@ export default function App() {
             </div>
             {/* 3 */}
             <div>
-              <button type="button" aria-expanded={showCP} aria-controls="faq-cp" className="font-medium" onClick={()=>setShowCP(!showCP)}>
+              <button onClick={() => setShowCP(!showCP)} className="font-medium">
                 What are Call-out Penalties? {showCP ? "▲" : "▼"}
               </button>
               {showCP && (
-                <div id="faq-cp" role="region" className="mt-1">
+                <div className="mt-1">
                   <p>• Block-level Callout: -10 points (1 instance in 2 weeks)</p>
                   <p>• 2+ Block Callouts: -15 points</p>
                   <p>• Load-level Callout: -17.1 points (1 instance in 6 weeks)</p>
                   <p>• 2+ Load-level Callouts: -20 points</p>
-                  <p>Penalties last 2 weeks for blocks and 6 weeks for loads, affecting eligibility and ratings.</p>
+                  <p>Penalties last 2 weeks for blocks and 6 weeks for loads.</p>
                 </div>
               )}
             </div>
             {/* 4 */}
             <div>
-              <button type="button" aria-expanded={showST} aria-controls="faq-st" className="font-medium" onClick={()=>setShowST(!showST)}>
+              <button onClick={() => setShowST(!showST)} className="font-medium">
                 What is S-Tier? {showST ? "▲" : "▼"}
               </button>
               {showST && (
-                <div id="faq-st" role="region" className="mt-1">
-                  <p>S-Tier is a special performance tier reserved for drivers who achieve 13 consecutive Perfect weeks. Once unlocked, S-Tier grants access to the 5+ year payband — even if you haven't reached 5 years of tenure yet. However, you must maintain Perfect rating to stay in S-Tier.</p>
+                <div className="mt-1">
+                  <p>S-Tier is reserved for drivers with 13 consecutive Perfect weeks. Once unlocked, it grants access to the 5+ year payband—but you must maintain Perfect rating to stay in S-Tier.</p>
                 </div>
               )}
             </div>
             {/* 5 */}
             <div>
-              <button type="button" aria-expanded={showDQ} aria-controls="faq-dq" className="font-medium" onClick={()=>setShowDQ(!showDQ)}>
+              <button onClick={() => setShowDQ(!showDQ)} className="font-medium">
                 What disqualifies me from getting a bonus? {showDQ ? "▲" : "▼"}
               </button>
               {showDQ && (
-                <div id="faq-dq" role="region" className="mt-1">
+                <div className="mt-1">
                   <p>• Your Weekly Rating is NI or AR</p>
                   <p>• You receive a major safety flag (e.g., camera, following distance, seatbelt)</p>
-                  <p>• You fail to meet Grade + Tenure + Scorecard thresholds for your payband</p>
-                  <p>• You have a recent severe event that disqualifies you from Netradyne bonus</p>
+                  <p>• You fail to meet Grade + Tenure + Scorecard thresholds</p>
+                  <p>• You have a recent severe event that disqualifies you</p>
                 </div>
               )}
             </div>
-            {/* 6 */}  
+            {/* 6 */}
             <div>
-              <button type="button" aria-expanded={showNDW} aria-controls="faq-ndw" className="font-medium" onClick={()=>setShowNDW(!showNDW)}>
+              <button onClick={() => setShowNDW(!showNDW)} className="font-medium">
                 How does the Netradyne Bonus work? {showNDW ? "▲" : "▼"}
               </button>
               {showNDW && (
-                <div id="faq-ndw" role="region" className="mt-1">
+                <div className="mt-1">
                   <p>The Netradyne Bonus is a separate quarterly incentive based on camera safety scores.</p>
                   <p>• Stark must earn Gold or Silver on Amazon's safety score</p>
                   <p>• You must have a Perfect or Meets Requirements rating</p>
                   <p>• You must not have any major camera flags or severe events in the last 6 weeks</p>
-                  <p>If eligible, your Netradyne bonus accrues weekly and is paid out in a lump sum at the end of each quarter.</p>
+                  <p>If eligible, your bonus accrues weekly and is paid as a lump sum at the end of each quarter.</p>
                 </div>
               )}
             </div>
-
             {/* Links */}
             <div>
-              <a href="https://drive.google.com/file/d/1CWVesfvKWsSFn7wv7bGvHv6kLb20Mzec/view?usp=sharing" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+              <a href="https://drive.google.com/file/d/1CWVesfvKWsSFn7wv7bGvHv6kLb20Mzec/view?usp=sharing"
+                 target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
                 📘 View Full Explainer PDF →
               </a>
             </div>
             <div>
-              <a href="https://docs.google.com/spreadsheets/d/1gTmNlGNo_OH1zysEFvh7dAbvEibC5vgoGX6AMINxFWQ/edit?usp=sharing" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+              <a href="https://docs.google.com/spreadsheets/d/1gTmNlGNo_OH1zysEFvh7dAbvEibC5vgoGX6AMINxFWQ/edit?usp=sharing"
+                 target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
                 📊 View Bonus Matrix Spreadsheet →
               </a>
             </div>
