@@ -121,25 +121,39 @@ export default function App() {
     if (typeof window !== "undefined") window.print();
   };
   const getTenureIndex = () => {
-    if (sTier && ["Fantastic Plus", "Fantastic", "Good", "Fair"].includes(scorecard))
+    if (
+      sTier &&
+      ["Fantastic Plus", "Fantastic", "Good", "Fair"].includes(scorecard)
+    )
       return 5;
     const y = parseInt(tenure.replace("+", ""), 10);
     return isNaN(y) ? 0 : Math.min(y, 5);
   };
   const getBonusRate = () => {
-    const key = rating === "Meets Requirements" ? "Meets Requirements" : rating;
+    const key =
+      rating === "Meets Requirements" ? "Meets Requirements" : rating;
     const card = BONUS_MATRIX[scorecard]?.[key];
     if (!card) return null;
     const tierKey = sTier ? "A" : ["D", "F"].includes(tier) ? "D & F" : tier;
     const rate = card[tierKey]?.[getTenureIndex()] ?? 24;
-    return { hourly: Math.min(rate, 32), bonusOnly: (Math.min(rate, 32) - 24).toFixed(2) };
+    return {
+      hourly: Math.min(rate, 32),
+      bonusOnly: (Math.min(rate, 32) - 24).toFixed(2),
+    };
   };
 
-  // Memoized calcs
-  const result = useMemo(() => getBonusRate(), [scorecard, rating, tier, tenure, sTier]);
+  // Memoized calculations
+  const result = useMemo(() => getBonusRate(), [
+    scorecard,
+    rating,
+    tier,
+    tenure,
+    sTier,
+  ]);
   const hourlyBonus = result ? parseFloat(result.bonusOnly) : 0;
   const isEligible = ["Perfect", "Meets Requirements"].includes(rating);
-  const qualifiesND = checkND && isEligible && netradyne !== "None" && severeEvent === "No";
+  const qualifiesND =
+    checkND && isEligible && netradyne !== "None" && severeEvent === "No";
   const netBonus = qualifiesND ? (netradyne === "Gold" ? 20 : 10) : 0;
 
   const totalH = parseFloat(hours || 0);
@@ -154,15 +168,15 @@ export default function App() {
 
   return (
     <div className="p-8 max-w-3xl mx-auto font-sans space-y-8">
-      <h1 className="text-4xl font-bold text-center">TierOne Bonus Simulator</h1>
+      <h1 className="text-4xl font-bold text-center">
+        TierOne Bonus Simulator
+      </h1>
 
       {/* Form */}
       <div className="bg-white p-6 rounded-lg shadow space-y-6">
         {/* Role */}
         <div>
-          <label htmlFor="role" className="block font-medium mb-1">
-            Role
-          </label>
+          <label htmlFor="role" className="block font-medium mb-1">Role</label>
           <select
             id="role"
             value={role}
@@ -311,270 +325,3 @@ export default function App() {
             checked={checkND}
             onChange={(e) => setCheckND(e.target.checked)}
             className="w-5 h-5"
-          />
-          <label htmlFor="ndToggle" className="font-medium">
-            Would you like to check your Netradyne Bonus?
-          </label>
-        </div>
-      </div>
-
-      {/* Netradyne Block */}
-      {checkND && (
-        <div className="bg-green-50 p-6 rounded-lg shadow space-y-4">
-          <h2 className="text-2xl font-semibold">📸 Netradyne Bonus</h2>
-          <div className="space-y-4">
-            <div>
-              <label className="block font-medium mb-1">Netradyne Status</label>
-              <select
-                value={netradyne}
-                onChange={(e) => setNetradyne(e.target.value)}
-                className="w-full border p-2 rounded"
-              >
-                <option value="">--</option>
-                <option>Gold</option>
-                <option>Silver</option>
-                <option>None</option>
-              </select>
-            </div>
-            <div>
-              <label className="block font-medium mb-1">
-                Any Severe Events in Last 6 Weeks?
-              </label>
-              <select
-                value={severeEvent}
-                onChange={(e) => setSevereEvent(e.target.value)}
-                className="w-full border p-2 rounded"
-              >
-                <option value="">--</option>
-                <option>No</option>
-                <option>Yes</option>
-              </select>
-            </div>
-            <p className="font-medium">
-              Bonus (if eligible): <span className="text-lg">${netBonus}</span>
-            </p>
-            <button
-              type="button"
-              aria-expanded={showNDE}
-              aria-controls="nd-explainer"
-              onClick={() => setShowNDE(!showNDE)}
-              className="font-semibold"
-            >
-              Netradyne Bonus Explainer {showNDE ? "▲" : "▼"}
-            </button>
-            {showNDE && (
-              <div
-                id="nd-explainer"
-                role="region"
-                className="text-sm pl-4"
-              >
-                The Netradyne Bonus is paid out quarterly if the company earns
-                Gold or Silver status on Amazon's camera safety score. You must
-                not have NI or AR ratings or receive major camera flags to
-                qualify. If eligible, your bonus accrues weekly and is paid as a
-                lump sum at the end of the quarter.
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Bonus Results */}
-      <div className="bg-white p-6 rounded-lg shadow space-y-4">
-        <h3 className="text-xl font-semibold mb-2">Bonus Results</h3>
-        <ul className="list-disc ml-6 space-y-1">
-          <li>Your Base Rate: ${base.toFixed(2)}</li>
-          <li>Hourly Bonus: +${hourlyBonus.toFixed(2)}/hr</li>
-          <li>New Hourly Rate: ${newRate}/hr</li>
-          <li>Overtime Pay: ${otPay}</li>
-          <li>Weekly Bonus Total: ${weeklyBonus}</li>
-          <li>Base Pay (incl. OT): ${baseOT}</li>
-          <li>
-            <strong>Total Weekly Pay:</strong> ${totalPay}
-          </li>
-        </ul>
-        <div className="flex space-x-4">
-          <button
-            type="button"
-            onClick={resetForm}
-            className="px-4 py-2 border rounded"
-          >
-            Reset
-          </button>
-          <button
-            type="button"
-            onClick={printResults}
-            className="px-4 py-2 border rounded"
-          >
-            Print
-          </button>
-        </div>
-      </div>
-
-      {/* FAQ */}
-      <div className="space-y-4">
-        <button
-          type="button"
-          aria-expanded={showFAQ}
-          aria-controls="faq-section"
-          onClick={() => setShowFAQ(!showFAQ)}
-          className="font-semibold"
-        >
-          Frequently Asked Questions {showFAQ ? "▲" : "▼"}
-        </button>
-        {showFAQ && (
-          <div
-            id="faq-section"
-            role="region"
-            className="text-sm space-y-4 pl-4"
-          >
-            {/* 1 */}
-            <div>
-              <button
-                type="button"
-                aria-expanded={showPG}
-                aria-controls="faq-pg"
-                onClick={() => setShowPG(!showPG)}
-                className="font-medium"
-              >
-                What is a Performance Grade (A–F)? {showPG ? "▲" : "▼"}
-              </button>
-              {showPG && (
-                <div id="faq-pg" role="region" className="mt-1">
-                  <p>Your Performance Grade is based on your last 13 weeks of overall Total Score.</p>
-                  <p><strong>A Grade:</strong> 10 weeks at 100%, rest at 90%+, 1 grace week at 70%+</p>
-                  <p><strong>B Grade:</strong> 5 weeks at 100%, rest at 90%+, 1 grace week at 70%+ or all 13 weeks at 90%+</p>
-                  <p><strong>C Grade:</strong> All other valid combinations</p>
-                  <p><strong>D Grade:</strong> 2+ weeks below 70% or 6+ weeks between 70–83%</p>
-                  <p><strong>F Grade:</strong> 5+ weeks below 70% or all 13 weeks between 70–83%</p>
-                </div>
-              )}
-            </div>
-            {/* 2 */}
-            <div>
-              <button
-                type="button"
-                aria-expanded={showWR}
-                aria-controls="faq-wr"
-                onClick={() => setShowWR(!showWR)}
-                className="font-medium"
-              >
-                How is Weekly Rating determined? {showWR ? "▲" : "▼"}
-              </button>
-              {showWR && (
-                <div id="faq-wr" role="region" className="mt-1">
-                  <p>Weekly Rating reflects your Total Score plus any safety, attendance, or behavioral flags.</p>
-                  <p><strong>Perfect:</strong> 100% score with zero flags</p>
-                  <p><strong>Meets Requirements:</strong> 83–99% with no major flags, or 100% with 1 minor flag</p>
-                  <p><strong>Needs Improvement:</strong> 70–82.99%, or 83–99% with minor flags</p>
-                  <p><strong>Action Required:</strong> Less than 70%, or any score with 3+ minor flags or 1 major flag</p>
-                </div>
-              )}
-            </div>
-            {/* 3 */}
-            <div>
-              <button
-                type="button"
-                aria-expanded={showCP}
-                aria-controls="faq-cp"
-                onClick={() => setShowCP(!showCP)}
-                className="font-medium"
-              >
-                What are Call-out Penalties? {showCP ? "▲" : "▼"}
-              </button>
-              {showCP && (
-                <div id="faq-cp" role="region" className="mt-1">
-                  <p>• Block-level Callout: -10 points (1 instance in 2 weeks)</p>
-                  <p>• 2+ Block Callouts: -15 points</p>
-                  <p>• Load-level Callout: -17.1 points (1 instance in 6 weeks)</p>
-                  <p>• 2+ Load-level Callouts: -20 points</p>
-                  <p>Penalties last 2 weeks for blocks and 6 weeks for loads, affecting eligibility and ratings.</p>
-                </div>
-              )}
-            </div>
-            {/* 4 */}
-            <div>
-              <button
-                type="button"
-                aria-expanded={showST}
-                aria-controls="faq-st"
-                onClick={() => setShowST(!showST)}
-                className="font-medium"
-              >
-                What is S-Tier? {showST ? "▲" : "▼"}
-              </button>
-              {showST && (
-                <div id="faq-st" role="region" className="mt-1">
-                  <p>S-Tier is reserved for drivers with 13 consecutive Perfect weeks. Once unlocked, it grants access to the 5+ year payband, but you must maintain Perfect rating.</p>
-                </div>
-              )}
-            </div>
-            {/* 5 */}
-            <div>
-              <button
-                type="button"
-                aria-expanded={showDQ}
-                aria-controls="faq-dq"
-                onClick={() => setShowDQ(!showDQ)}
-                className="font-medium"
-              >
-                What disqualifies me from getting a bonus? {showDQ ? "▲" : "▼"}
-              </button>
-              {showDQ && (
-                <div id="faq-dq" role="region" className="mt-1">
-                  <p>• Your Weekly Rating is NI or AR</p>
-                  <p>• You receive a major camera or safety flag</p>
-                  <p>• You fail to meet Grade + Tenure + Scorecard thresholds</p>
-                  <p>• You have a recent severe event that disqualifies you</p>
-                </div>
-              )}
-            </div>
-            {/* 6 */}
-            <div>
-              <button
-                type="button"
-                aria-expanded={showNDW}
-                aria-controls="faq-ndw"
-                onClick={() => setShowNDW(!showNDW)}
-                className="font-medium"
-              >
-                How does the Netradyne Bonus work? {showNDW ? "▲" : "▼"}
-              </button>
-              {showNDW && (
-                <div id="faq-ndw" role="region" className="mt-1">
-                  <p>The Netradyne Bonus is a separate quarterly incentive based on camera safety scores.</p>
-                  <p>• Stark must earn Gold or Silver on Amazon's safety score</p>
-                  <p>• You must have a Perfect or Meets Requirements rating</p>
-                  <p>• No major camera flags or severe events in the last 6 weeks</p>
-                  <p>If eligible, your bonus accrues weekly and is paid as a lump sum at the end of each quarter.</p>
-                </div>
-              )}
-            </div>
-
-            {/* Links */}
-            <div>
-              <a
-                href="https://drive.google.com/file/d/1CWVesfvKWsSFn7wv7bGvHv6kLb20Mzec/view?usp=sharing"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 underline"
-              >
-                📘 View Full Explainer PDF →
-              </a>
-            </div>
-            <div>
-              <a
-                href="https://docs.google.com/spreadsheets/d/1gTmNlGNo_OH1zysEFvh7dAbvEibC5vgoGX6AMINxFWQ/edit?usp=sharing"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 underline"
-              >
-                📊 View Bonus Matrix Spreadsheet →
-              </a>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
