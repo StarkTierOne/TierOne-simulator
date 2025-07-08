@@ -49,21 +49,12 @@ export default function App() {
     }
   };
 
-  const getTenureIndex = () => sTier && scorecard === "Fantastic Plus" ? 5 : Math.min(parseInt(tenure) || 0, 5);
-
-  const getBonusRate = () => {
-    const ratingKey = rating === "Meets" ? "Meets Requirements" : rating;
-    const card = BONUS_MATRIX[scorecard]?.[ratingKey];
-    if (!card) return null;
-    const tierKey = sTier ? "A" : (tier === "D" || tier === "F" ? "D & F" : tier);
-    const rates = card[tierKey];
-    if (!rates) return null;
-    const base = rates[getTenureIndex()] || 24;
-    return {
-      hourly: Math.min(base, 32),
-      bonusOnly: (Math.min(base, 32) - 24).toFixed(2),
-    };
-  };
+const getTenureIndex = () => {
+  const validSTierScores = ["Fantastic Plus", "Fantastic", "Good", "Fair"];
+  if (sTier && validSTierScores.includes(scorecard)) return 5;
+  const years = parseInt(tenure);
+  return isNaN(years) ? 0 : Math.min(years, 5);
+};
 
   const result = getBonusRate();
   const isEligible = rating === "Perfect" || rating === "Meets Requirements";
