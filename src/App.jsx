@@ -35,7 +35,7 @@ export default function App() {
   const [tenure, setTenure] = useState("");
   const [sTier, setSTier] = useState(false);
 
-  // Netradyne state
+  // Netradyne Bonus state
   const [checkND, setCheckND] = useState(false);
   const [netradyne, setNetradyne] = useState("");
   const [severeEvent, setSevereEvent] = useState("");
@@ -50,7 +50,7 @@ export default function App() {
   const [showDQ, setShowDQ] = useState(false);
   const [showNDW, setShowNDW] = useState(false);
 
-  // 39-Hour & Lunch bonus state
+  // 39-Hour & Lunch Bonus state (Driver only)
   const [daysWorked, setDaysWorked] = useState("");
   const [driverRejects, setDriverRejects] = useState(0);
   const [amazonRejects, setAmazonRejects] = useState(0);
@@ -62,7 +62,7 @@ export default function App() {
     if (rating !== "Perfect") setSTier(false);
   }, [rating]);
 
-  // Helpers
+  // Helper functions
   const resetForm = () => {
     setRole(""); setHours(""); setBaseRate("");
     setScorecard(""); setRating(""); setTier("");
@@ -87,54 +87,23 @@ export default function App() {
   };
 
   // Calculations
-  const result = useMemo(() => getBonusRate(), [scorecard, rating, tier, tenure, sTier]);
+  const result = useMemo(() => getBonusRate(), [scorecard,rating,tier,tenure,sTier]);
   const hourlyBonus = result ? parseFloat(result.bonusOnly) : 0;
   const totalH = parseFloat(hours || 0);
   const otH = totalH > 40 ? totalH - 40 : 0;
 
   // 39-Hour Guarantee (Driver only)
-  const is39Eligible = role === "Driver" && rating === "Perfect" && (parseInt(daysWorked,10) || 0) >= 3 && driverRejects === 0;
+  const is39Eligible = role === "Driver" && rating === "Perfect" && (parseInt(daysWorked,10)||0) >= 3 && driverRejects === 0;
   const creditedHours39 = is39Eligible ? Math.max(totalH,39) : totalH;
 
   // Paid Lunch Bonus (Driver only)
   const lunchEligible = role === "Driver" && rating === "Perfect" && ["A","B"].includes(tier);
-  const lunchAmt = lunchEligible ? (parseInt(daysWorked,10) || 0) * (parseFloat(lunchRate) || 0) : 0;
+  const lunchAmt = lunchEligible ? (parseInt(daysWorked,10)||0)*(parseFloat(lunchRate)||0) : 0;
 
   // Base & Totals
-  const base = role === "Driver" ? 24 : parseFloat(baseRate) || 24;
-  const newRate = (base + hourlyBonus).toFixed(2);
-  const otPay = (base * 1.5 * otH).toFixed(2);
-  const performanceBonusTotal = (hourlyBonus * totalH).toFixed(2);
-  const guaranteePay = (base * creditedHours39).toFixed(2);
-  const baseOT = (base * creditedHours39 + parseFloat(otPay)).toFixed(2);
-  const totalPay = ((base + hourlyBonus) * creditedHours39 + parseFloat(otPay) + lunchAmt).toFixed(2);
-
-  // Netradyne Bonus
-  const isEligible = ["Perfect","Meets Requirements"].includes(rating);
-  const qualifiesND = checkND && isEligible && netradyne !== "None" && severeEvent === "No";
-  const netBonus = qualifiesND ? (netradyne === "Gold" ? 20 : 10) : 0;
-
-  return (
-    <div className="p-8 max-w-3xl mx-auto font-sans space-y-8">
-      <h1 className="text-4xl font-bold text-center">TierOne Bonus Simulator</h1>
-
-      {/* Form */}
-      <div className="bg-white p-6 rounded-lg shadow space-y-6">
-        {/* Role */}
-        <div>
-          <label htmlFor="role" className="block font-medium mb-1">Role</label>
-          <select id="role" value={role} onChange={e => setRole(e.target.value)} className="w-full border p-2 rounded">
-            <option value="">-- Select role --</option>
-            <option>Driver</option>
-            <option>Trainer</option>
-            <option>Supervisor</option>
-          </select>
-        </div>
-
-        {/* Total Hours */}
-        <div>
-          <label htmlFor="hours" className="block font-medium mb-1">Total Hours Worked (Optional)</label>
-          <input id="hours" type="number" value={hours} onChange={e => setHours(e.target.value)} placeholder="e.g. 38.5" className="w-full border p-2 rounded"/>
-        </div>
-
-        {/* Base Pay */}
+  const base = role === "Driver" ? 24 : parseFloat(baseRate)||24;
+  const newRate = (base+hourlyBonus).toFixed(2);
+  const otPay = (base*1.5*otH).toFixed(2);
+  const performanceBonusTotal = (hourlyBonus*totalH).toFixed(2);
+  const guaranteePay = (base*creditedHours39).toFixed(2);
+  const baseOT = (base*creditedHours39 + parseFloat(otPay)).
