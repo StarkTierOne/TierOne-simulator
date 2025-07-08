@@ -1,16 +1,16 @@
-// ✅ Full rebuild of TierOne Bonus Simulator with all working logic, layout, styled S-Tier toggle, Bonus Results, Netradyne Bonus section, and FAQ
-
+// ✅ Rebuilt TierOne Bonus Simulator
 // Includes:
 // - All Amazon scorecards
-// - S-Tier logic and override
-// - Full JSX structure (return block)
-// - Netradyne Bonus section
+// - Full S-Tier override logic (no manual A/Perfect needed)
 // - Clean top-to-bottom layout
+// - Bonus Results
+// - Netradyne Bonus section
+// - Full FAQ section
 
 import React, { useState, useEffect } from "react";
 
 export default function App() {
-  const [role, setRole] = useState("");
+    const [role, setRole] = useState("");
   const [scorecard, setScorecard] = useState("");
   const [rating, setRating] = useState("");
   const [tier, setTier] = useState("");
@@ -49,13 +49,26 @@ export default function App() {
     }
   };
 
-const getTenureIndex = () => {
-  const validSTierScores = ["Fantastic Plus", "Fantastic", "Good", "Fair"];
-  if (sTier && validSTierScores.includes(scorecard)) return 5;
-  const years = parseInt(tenure);
-  return isNaN(years) ? 0 : Math.min(years, 5);
+  const getTenureIndex = () => {
+    const validSTierScores = ["Fantastic Plus", "Fantastic", "Good", "Fair"];
+    if (sTier && validSTierScores.includes(scorecard)) return 5;
+    const years = parseInt(tenure);
+    return isNaN(years) ? 0 : Math.min(years, 5);
   };
-};
+
+  const getBonusRate = () => {
+    const ratingKey = rating === "Meets" ? "Meets Requirements" : rating;
+    const card = BONUS_MATRIX[scorecard]?.[ratingKey];
+    if (!card) return null;
+    const tierKey = sTier ? "A" : (tier === "D" || tier === "F" ? "D & F" : tier);
+    const rates = card[tierKey];
+    if (!rates) return null;
+    const base = rates[getTenureIndex()] || 24;
+    return {
+      hourly: Math.min(base, 32),
+      bonusOnly: (Math.min(base, 32) - 24).toFixed(2),
+    };
+  };
 
   const result = getBonusRate();
   const isEligible = rating === "Perfect" || rating === "Meets Requirements";
@@ -117,6 +130,7 @@ const getTenureIndex = () => {
               <option>F</option>
             </select>
           </div>
+
           <div>
             <label>Years at Stark</label>
             <select value={tenure} onChange={(e) => setTenure(e.target.value)} className="p-2 border rounded w-full">
@@ -131,30 +145,37 @@ const getTenureIndex = () => {
           </div>
         </div>
 
-        <div className="mb-6">
-          <label className="block text-base font-semibold mb-2">S-Tier Status</label>
-          <div className="flex items-center space-x-4">
+        <div className="mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded shadow">
+          <div className="flex items-center justify-between">
+            <div>
+              <label className="text-base font-semibold">S-Tier Status</label>
+              <p className="text-sm text-gray-700">
+                Achieve 13 consecutive Perfect weeks to unlock automatic top-tier pay.<br />
+                {sTier
+                  ? "✅ S-Tier enabled — you're earning the 5-year payband."
+                  : rating !== "Perfect"
+                  ? "S-Tier is locked. Requires a Perfect rating."
+                  : "Toggle below to enable if eligible."}
+              </p>
+            </div>
             <button
               type="button"
               disabled={rating !== "Perfect"}
               onClick={() => setSTier(!sTier)}
-              className={`relative inline-flex items-center h-8 w-14 rounded-full transition-colors ${
-                rating !== "Perfect" ? "bg-gray-300 cursor-not-allowed" : sTier ? "bg-green-500" : "bg-gray-300"
+              className={`w-16 h-8 rounded-full border transition-colors duration-300 focus:outline-none ${
+                rating !== "Perfect"
+                  ? "bg-gray-300 cursor-not-allowed border-gray-400"
+                  : sTier
+                  ? "bg-gradient-to-r from-yellow-400 to-yellow-600 border-yellow-500"
+                  : "bg-gray-300 border-gray-400"
               }`}
             >
-              <span
-                className={`inline-block w-6 h-6 transform bg-white rounded-full shadow-md transition-transform duration-200 ${
-                  sTier ? "translate-x-6" : "translate-x-1"
+              <div
+                className={`h-6 w-6 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
+                  sTier ? "translate-x-8" : "translate-x-1"
                 }`}
               />
             </button>
-            <span className="text-sm text-gray-700 max-w-xs">
-              {rating !== "Perfect"
-                ? "S-Tier is locked. Requires a Perfect rating."
-                : sTier
-                ? "✅ S-Tier enabled — you're now earning top-tier pay."
-                : "Have you been Perfect for 13 weeks straight? Toggle to unlock S-Tier status."}
-            </span>
           </div>
         </div>
 
@@ -167,24 +188,28 @@ const getTenureIndex = () => {
             <input type="number" value={baseRate} onChange={(e) => setBaseRate(e.target.value)} className="p-2 border rounded w-full" />
           </>
         )}
-      </div>
+   </div>
+  );
+}
+{/* Bonus Results Section */}
+<div className="bg-blue-50 p-6 rounded-lg shadow mb-8">
+  <h2 className="text-xl font-semibold mb-4">Bonus Results</h2>
+  {!result ? (
+    <p className="text-red-600">⚠️ Incomplete or invalid input</p>
+  ) : (
+    <ul className="space-y-2 text-gray-800">
+      <li><strong>Your Base Rate:</strong> ${base.toFixed(2)}</li>
+      <li><strong>Hourly Bonus:</strong> {isEligible ? `+$${hourlyBonus.toFixed(2)}` : "⚠️ Ineligible for bonus"}</li>
+      <li><strong>New Hourly Pay:</strong> {isEligible ? `$${newHourly}` : "⚠️ Ineligible for bonus"}</li>
+      <li><strong>Overtime Pay:</strong> ${otPay}</li>
+      <li><strong>Weekly Bonus:</strong> {isEligible ? `$${weeklyBonus}` : "⚠️ Ineligible for bonus"}</li>
+      <li><strong>Base Pay (incl. OT):</strong> ${basePayInclOT}</li>
+      <li><strong>Total Weekly Pay:</strong> {isEligible ? `$${totalWeeklyPay}` : "⚠️ Ineligible for bonus"}</li>
+    </ul>
+  )}
+</div>
 
-      <div className="bg-blue-50 p-6 rounded-lg shadow mb-8">
-        <h2 className="text-xl font-semibold mb-4">Bonus Results</h2>
-        {!result ? (
-          <p className="text-red-600">⚠️ Incomplete or invalid input</p>
-        ) : (
-          <ul className="space-y-2 text-gray-800">
-            <li><strong>Your Base Rate:</strong> ${base.toFixed(2)}</li>
-            <li><strong>Hourly Bonus:</strong> {isEligible ? `+$${hourlyBonus.toFixed(2)}` : "⚠️ Ineligible for bonus"}</li>
-            <li><strong>New Hourly Pay:</strong> {isEligible ? `$${newHourly}` : "⚠️ Ineligible for bonus"}</li>
-            <li><strong>Overtime Pay:</strong> ${otPay}</li>
-            <li><strong>Weekly Bonus:</strong> {isEligible ? `$${weeklyBonus}` : "⚠️ Ineligible for bonus"}</li>
-            <li><strong>Base Pay (incl. OT):</strong> ${basePayInclOT}</li>
-            <li><strong>Total Weekly Pay:</strong> {isEligible ? `$${totalWeeklyPay}` : "⚠️ Ineligible for bonus"}</li>
-          </ul>
-        )}
-      </div>
+{/* Netradyne Toggle + Bonus */}
 <div className="mb-4">
   <label className="flex items-center space-x-2">
     <input type="checkbox" checked={checkND} onChange={(e) => setCheckND(e.target.checked)} />
@@ -195,7 +220,6 @@ const getTenureIndex = () => {
 {checkND && (
   <div className="bg-green-50 p-4 rounded-lg shadow mb-8">
     <h3 className="font-semibold mb-2">📸 Netradyne Bonus</h3>
-
     <label>Netradyne Status</label>
     <select value={netradyne} onChange={(e) => setNetradyne(e.target.value)} className="p-2 border rounded w-full mb-2">
       <option value="">--</option>
@@ -224,78 +248,55 @@ const getTenureIndex = () => {
   </div>
 )}
 
+{/* FAQ Section */}
 <div className="mt-10 space-y-4">
   <h2 className="text-xl font-semibold text-center">Frequently Asked Questions</h2>
 
   <details className="border rounded p-3">
     <summary className="font-medium cursor-pointer">What is a Performance Grade (A–F)?</summary>
     <p className="mt-2 text-sm text-gray-700">
-      Your Performance Grade is based on your last 13 weeks of overall Total Score.
-      <br /><br />
-      <strong>A Grade:</strong> 10 weeks at 100%, rest at 90%+, 1 grace week at 70%+<br />
-      <strong>B Grade:</strong> 5 weeks at 100%, rest at 90%+, 1 grace week at 70%+ or all 13 weeks at 90%+<br />
-      <strong>C Grade:</strong> All other valid combinations<br />
-      <strong>D Grade:</strong> 2+ weeks below 70% or 6+ weeks between 70–83%<br />
-      <strong>F Grade:</strong> 5+ weeks below 70% or all 13 weeks between 70–83%<br /><br />
-      Grades determine your bonus eligibility and which payband you qualify for.
+      Your Performance Grade is based on your last 13 weeks of overall Total Score.<br /><br />
+      <strong>A:</strong> 10 weeks at 100%, rest at 90%+, 1 grace week at 70%+<br />
+      <strong>B:</strong> 5 weeks at 100%, rest at 90%+, 1 grace week at 70%+, or all 13 weeks at 90%+<br />
+      <strong>C:</strong> All other valid combinations<br />
+      <strong>D:</strong> 2+ weeks below 70% or 6+ between 70–83%<br />
+      <strong>F:</strong> 5+ weeks below 70% or all 13 weeks between 70–83%
     </p>
   </details>
 
   <details className="border rounded p-3">
     <summary className="font-medium cursor-pointer">How is Weekly Rating determined?</summary>
     <p className="mt-2 text-sm text-gray-700">
-      Weekly Rating reflects how you performed this week — it's based on your Total Score plus any safety, attendance, or behavioral flags.
-      <br /><br />
-      <strong>Perfect:</strong> 100% score with zero flags<br />
-      <strong>Meets Requirements:</strong> 83–99% with no major flags, or 100% with 1 minor flag<br />
+      Based on your Total Score plus safety, attendance, or behavioral flags.<br /><br />
+      <strong>Perfect:</strong> 100% + no flags<br />
+      <strong>Meets Requirements:</strong> 83–99% and no major flag, or 100% with 1 minor flag<br />
       <strong>Needs Improvement:</strong> 70–82.99%, or 83–99% with minor flags<br />
-      <strong>Action Required:</strong> Less than 70%, or any score with 3+ minor flags or 1 major flag<br /><br />
-      Only Perfect and Meets Requirements are eligible for bonus.
+      <strong>Action Required:</strong> &lt;70%, or any score with 3+ minor or 1 major flag
     </p>
   </details>
 
   <details className="border rounded p-3">
     <summary className="font-medium cursor-pointer">What are Call-out Penalties?</summary>
     <p className="mt-2 text-sm text-gray-700">
-      Call-outs directly reduce your Total Score and affect both Weekly Rating and Grade.
-      <br /><br />
-      • <strong>Block-level Callout:</strong> -10 points (1 instance in 2 weeks)<br />
-      • <strong>2+ Block Callouts:</strong> -15 points<br />
-      • <strong>Load-level Callout:</strong> -17.1 points (1 instance in 6 weeks)<br />
-      • <strong>2+ Load Callouts:</strong> -20 points<br /><br />
-      Block penalties last 2 weeks. Load penalties last 6 weeks. They affect bonus eligibility and can drop you to NI or AR.
+      • Block-level Callout = -10 pts (1x in 2 weeks)<br />
+      • 2+ Block Callouts = -15 pts<br />
+      • Load-level Callout = -17.1 pts (1x in 6 weeks)<br />
+      • 2+ Load Callouts = -20 pts<br /><br />
+      Block penalties last 2 weeks. Load penalties last 6 weeks.
     </p>
   </details>
 
   <details className="border rounded p-3">
     <summary className="font-medium cursor-pointer">What is S-Tier?</summary>
     <p className="mt-2 text-sm text-gray-700">
-      S-Tier is a special performance tier reserved for drivers who achieve <strong>13 consecutive Perfect weeks</strong>.
-      <br /><br />
-      Once unlocked, S-Tier grants access to the 5+ year payband — even if you haven't reached 5 years of tenure yet. However, you must maintain Perfect rating to stay in S-Tier.
-    </p>
-  </details>
-
-  <details className="border rounded p-3">
-    <summary className="font-medium cursor-pointer">What disqualifies me from getting a bonus?</summary>
-    <p className="mt-2 text-sm text-gray-700">
-      You may be disqualified if:<br /><br />
-      • Your Weekly Rating is NI or AR<br />
-      • You receive a major safety flag (e.g., camera, following distance, seatbelt)<br />
-      • You fail to meet Grade + Tenure + Scorecard thresholds for your payband<br />
-      • You have a recent severe event that disqualifies you from Netradyne bonus
+      Earned after 13 consecutive Perfect weeks. Grants access to the 5-year payband, even without 5 years of tenure. You must maintain Perfect rating to keep it.
     </p>
   </details>
 
   <details className="border rounded p-3">
     <summary className="font-medium cursor-pointer">How does the Netradyne Bonus work?</summary>
     <p className="mt-2 text-sm text-gray-700">
-      The Netradyne Bonus is a separate quarterly incentive based on camera safety scores.
-      <br /><br />
-      • Stark must earn Gold or Silver on Amazon's safety score<br />
-      • You must have a Perfect or Meets Requirements rating<br />
-      • You must not have any major camera flags or severe events in the last 6 weeks<br /><br />
-      If eligible, your Netradyne bonus accrues weekly and is paid out in a lump sum at the end of each quarter.
+      Company must qualify (Gold/Silver). You must be Perfect or Meets, and have no major flags or severe events in the past 6 weeks. Bonus accrues weekly, paid quarterly.
     </p>
   </details>
 
@@ -308,7 +309,3 @@ const getTenureIndex = () => {
     📘 View Full Explainer PDF →
   </a>
 </div>
-
-</div>
-  );
-}
