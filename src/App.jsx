@@ -54,6 +54,7 @@ const getTenureIndex = () => {
   if (sTier && validSTierScores.includes(scorecard)) return 5;
   const years = parseInt(tenure);
   return isNaN(years) ? 0 : Math.min(years, 5);
+  };
 };
 
   const result = getBonusRate();
