@@ -23,6 +23,12 @@ export default function App() {
   const [severeEvent, setSevereEvent] = useState("");
   const [showNDE, setShowNDE] = useState(false);
   const [showFAQ, setShowFAQ] = useState(false);
+  const [showPG, setShowPG] = useState(false);
+  const [showWR, setShowWR] = useState(false);
+  const [showCP, setShowCP] = useState(false);
+  const [showST, setShowST] = useState(false);
+  const [showDQ, setShowDQ] = useState(false);
+  const [showNDW, setShowNDW] = useState(false);
 
   useEffect(() => {
     if (rating !== "Perfect") setSTier(false);
@@ -33,7 +39,9 @@ export default function App() {
     setCheckND(false); setNetradyne(""); setSevereEvent("");
   };
 
-  const printResults = () => typeof window !== "undefined" && window.print();
+  const printResults = () => {
+    if (typeof window !== "undefined") window.print();
+  };
 
   const getTenureIndex = () => {
     if (sTier && ["Fantastic Plus","Fantastic","Good","Fair"].includes(scorecard)) return 5;
@@ -45,26 +53,26 @@ export default function App() {
     const key = rating === "Meets Requirements" ? "Meets Requirements" : rating;
     const card = BONUS_MATRIX[scorecard]?.[key];
     if (!card) return null;
-    const tierKey = sTier ? "A" : (tier === "D"||tier === "F" ? "D & F" : tier);
+    const tierKey = sTier ? "A" : (tier === "D" || tier === "F" ? "D & F" : tier);
     const rate = card[tierKey]?.[getTenureIndex()] || 24;
     return { hourly: Math.min(rate,32), bonusOnly: (Math.min(rate,32)-24).toFixed(2) };
   };
 
-  const result = getBonusRate();
-  const hourlyBonus   = result ? parseFloat(result.bonusOnly) : 0;
-  const isEligible    = rating === "Perfect" || rating === "Meets Requirements";
-  const qualifiesND   = checkND && isEligible && netradyne !== "None" && severeEvent === "No";
-  const netradyneBonus= qualifiesND ? (netradyne === "Gold" ? 20 : 10) : 0;
+  const result       = getBonusRate();
+  const hourlyBonus = result ? parseFloat(result.bonusOnly) : 0;
+  const isEligible  = rating === "Perfect" || rating === "Meets Requirements";
+  const qualifiesND = checkND && isEligible && netradyne !== "None" && severeEvent === "No";
+  const netBonus    = qualifiesND ? (netradyne === "Gold" ? 20 : 10) : 0;
 
-  const totalHours    = parseFloat(hours || 0);
-  const otHours       = totalHours > 40 ? totalHours - 40 : 0;
-  const baseHours     = Math.min(totalHours,40);
-  const base          = role === "Driver" ? 24 : parseFloat(baseRate) || 24;
-  const newHourlyRate = (base + hourlyBonus).toFixed(2);
-  const otPay         = (base * 1.5 * otHours).toFixed(2);
-  const weeklyBonusAmt= (hourlyBonus * baseHours).toFixed(2);
-  const basePayOT     = (base * baseHours + parseFloat(otPay)).toFixed(2);
-  const totalPay      = ((base + hourlyBonus)*baseHours + parseFloat(otPay)).toFixed(2);
+  const totalH      = parseFloat(hours || 0);
+  const otH         = totalH > 40 ? totalH - 40 : 0;
+  const baseH       = Math.min(totalH,40);
+  const base        = role === "Driver" ? 24 : parseFloat(baseRate) || 24;
+  const newRate     = (base + hourlyBonus).toFixed(2);
+  const otPay       = (base * 1.5 * otH).toFixed(2);
+  const weeklyBonus = (hourlyBonus * baseH).toFixed(2);
+  const baseOT      = (base * baseH + parseFloat(otPay)).toFixed(2);
+  const totalPay    = ((base + hourlyBonus)*baseH + parseFloat(otPay)).toFixed(2);
 
   return (
     <div className="p-8 max-w-3xl mx-auto font-sans space-y-8">
@@ -73,200 +81,4 @@ export default function App() {
       <div className="bg-white p-6 rounded-lg shadow space-y-6">
         <div>
           <label className="block font-medium mb-1" htmlFor="role">Role</label>
-          <select id="role" value={role} onChange={e=>setRole(e.target.value)} className="w-full border p-2 rounded">
-            <option value="">-- Select role --</option>
-            <option>Driver</option>
-            <option>Trainer</option>
-            <option>Supervisor</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block font-medium mb-1" htmlFor="hours">Total Hours Worked (Optional)</label>
-          <input id="hours" type="number" value={hours} onChange={e=>setHours(e.target.value)} placeholder="e.g. 38.5" className="w-full border p-2 rounded" />
-        </div>
-
-        {(role === "Trainer" || role === "Supervisor") && (
-          <div>
-            <label className="block font-medium mb-1" htmlFor="baseRate">Base Pay (Optional)</label>
-            <input id="baseRate" type="number" value={baseRate} onChange={e=>setBaseRate(e.target.value)} placeholder="e.g. 27" className="w-full border p-2 rounded" />
-          </div>
-        )}
-
-        <div>
-          <label className="block font-medium mb-1" htmlFor="scorecard">Amazon Scorecard</label>
-          <select id="scorecard" value={scorecard} onChange={e=>setScorecard(e.target.value)} className="w-full border p-2 rounded">
-            <option value="">-- Select scorecard --</option>
-            <option>Fantastic Plus</option>
-            <option>Fantastic</option>
-            <option>Good</option>
-            <option>Fair</option>
-            <option>Poor</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block font-medium mb-1" htmlFor="rating">Weekly Rating</label>
-          <select id="rating" value={rating} onChange={e=>setRating(e.target.value)} className="w-full border p-2 rounded">
-            <option value="">-- Select rating --</option>
-            <option>Perfect</option>
-            <option>Meets Requirements</option>
-            <option>Needs Improvement</option>
-            <option>Action Required</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block font-medium mb-1" htmlFor="tier">Performance Grade</label>
-          <select id="tier" value={tier} onChange={e=>setTier(e.target.value)} className="w-full border p-2 rounded">
-            <option value="">-- Select grade --</option>
-            <option>A</option>
-            <option>B</option>
-            <option>C</option>
-            <option>D</option>
-            <option>F</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block font-medium mb-1" htmlFor="tenure">Years at Stark</label>
-          <select id="tenure" value={tenure} onChange={e=>setTenure(e.target.value)} className="w-full border p-2 rounded">
-            <option value="">-- Select tenure --</option>
-            <option>&lt;1</option>
-            <option>1</option>
-            <option>2</option>
-            <option>3</option>
-            <option>4</option>
-            <option>5+</option>
-          </select>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <input type="checkbox" id="sTier" checked={sTier} onChange={e=>setSTier(e.target.checked)} disabled={rating!=="Perfect"} className="w-5 h-5"/>
-          <label htmlFor="sTier" className="font-medium">S-Tier (13 Perfect Weeks)</label>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <input type="checkbox" id="ndToggle" checked={checkND} onChange={e=>setCheckND(e.target.checked)} className="w-5 h-5"/>
-          <label htmlFor="ndToggle" className="font-medium">Would you like to check your Netradyne Bonus?</label>
-        </div>
-      </div>
-
-      {checkND && (
-        <div className="bg-green-50 p-6 rounded-lg shadow space-y-4">
-          <h2 className="text-2xl font-semibold">📸 Netradyne Bonus</h2>
-          <div className="flex flex-col space-y-4">
-            <div>
-              <label className="block font-medium mb-1">Netradyne Status</label>
-              <select value={netradyne} onChange={e=>setNetradyne(e.target.value)} className="w-full border p-2 rounded">
-                <option value="">--</option>
-                <option>Gold</option>
-                <option>Silver</option>
-                <option>None</option>
-              </select>
-            </div>
-            <div>
-              <label className="block font-medium mb-1">Any Severe Events in Last 6 Weeks?</label>
-              <select value={severeEvent} onChange={e=>setSevereEvent(e.target.value)} className="w-full border p-2 rounded">
-                <option value="">--</option>
-                <option>No</option>
-                <option>Yes</option>
-              </select>
-            </div>
-            <p className="font-medium">Bonus (if eligible): <span className="text-lg">${netradyneBonus}</span></p>
-            <button onClick={()=>setShowNDE(!showNDE)} className="font-semibold">Netradyne Bonus Explainer {showNDE ? '▲' : '▼'}</button>
-            {showNDE && (
-              <div className="text-sm pl-4">
-                <p>The Netradyne Bonus is paid out quarterly if the company earns Gold or Silver status on Amazon's camera safety score. You must not have NI or AR ratings or receive major camera flags to qualify. If eligible, your bonus accrues weekly and is paid as a lump sum at the end of the quarter.</p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      <div className="bg-white p-6 rounded-lg shadow space-y-4">
-        <h3 className="text-xl font-semibold mb-2">Bonus Results</h3>
-        <ul className="list-disc ml-6 space-y-1">
-          <li>Your Base Rate: ${base.toFixed(2)}</li>
-          <li>Hourly Bonus: +${hourlyBonus.toFixed(2)}/hr</li>
-          <li>New Hourly Rate: ${newHourlyRate}/hr</li>
-          <li>Overtime Pay: ${otPay}</li>
-          <li>Weekly Bonus Total: ${weeklyBonusAmt}</li>
-          <li>Base Pay (incl. OT): ${basePayOT}</li>
-          <li><strong>Total Weekly Pay:</strong> ${totalPay}</li>
-        </ul>
-        <div className="flex space-x-4">
-          <button onClick={resetForm} className="px-4 py-2 border rounded">Reset</button>
-          <button onClick={printResults} className="px-4 py-2 border rounded">Print</button>
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        <button onClick={()=>setShowFAQ(!showFAQ)} className="font-semibold">Frequently Asked Questions {showFAQ ? '▲' : '▼'}</button>
-        {showFAQ && (
-          <div className="text-sm space-y-4 pl-4">
-            <div>
-              <p className="font-medium">What is a Performance Grade (A–F)?</p>
-              <p>Your Performance Grade is based on your last 13 weeks of overall Total Score.</p>
-              <ul className="list-disc list-inside ml-6">
-                <li><strong>A Grade:</strong> 10 weeks at 100%, rest at 90%+, 1 grace week at 70%+</li>
-                <li><strong>B Grade:</strong> 5 weeks at 100%, rest at 90%+, 1 grace week at 70%+ or all 13 weeks at 90%+</li>
-                <li><strong>C Grade:</strong> All other valid combinations</li>
-                <li><strong>D Grade:</strong> 2+ weeks below 70% or 6+ weeks between 70–83%</li>
-                <li><strong>F Grade:</strong> 5+ weeks below 70% or all 13 weeks between 70–83%</li>
-              </ul>
-            </div>
-            <div>
-              <p className="font-medium">How is Weekly Rating determined?</p>
-              <p>Weekly Rating reflects how you performed this week — it's based on your Total Score plus any safety, attendance, or behavioral flags.</p>
-              <ul className="list-disc list-inside ml-6">
-                <li><strong>Perfect:</strong> 100% score with zero flags</li>
-                <li><strong>Meets Requirements:</strong> 83–99% with no major flags, or 100% with 1 minor flag</li>
-                <li><strong>Needs Improvement:</strong> 70–82.99%, or 83–99% with minor flags</li>
-                <li><strong>Action Required:</strong> Less than 70%, or any score with 3+ minor flags or 1 major flag</li>
-              </ul>
-            </div>
-            <div>
-              <p className="font-medium">What are Call-out Penalties?</p>
-              <ul className="list-disc list-inside ml-6">
-                <li>Block-level Callout: -10 points (1 instance in 2 weeks)</li>
-                <li>2+ Block Callouts: -15 points</li>
-                <li>Load-level Callout: -17.1 points (1 instance in 6 weeks)</li>
-                <li>2+ Load-level Callouts: -20 points</li>
-              </ul>
-              <p>Penalties last 2 weeks for blocks and 6 weeks for loads, affecting eligibility and ratings.</p>
-            </div>
-            <div>
-              <p className="font-medium">What is S-Tier?</p>
-              <p>S-Tier is a special performance tier reserved for drivers who achieve 13 consecutive Perfect weeks. Once unlocked, S-Tier grants access to the 5+ year payband — even if you haven't reached 5 years tenure. You must maintain Perfect rating to stay in S-Tier.</p>
-            </div>
-            <div>
-              <p className="font-medium">What disqualifies me from getting a bonus?</p>
-              <ul className="list-disc list-inside ml-6">
-                <li>Your Weekly Rating is NI or AR</li>
-                <li>You receive a major camera or safety flag</li>
-                <li>You fail to meet Grade + Tenure + Scorecard thresholds</li>
-                <li>You have a recent severe event that disqualifies you</li>
-              </ul>
-            </div>
-            <div>
-              <p className="font-medium">How does the Netradyne Bonus work?</p>
-              <p>The Netradyne Bonus is a separate quarterly incentive based on camera safety scores.</p>
-              <ul className="list-disc list-inside ml-6">
-                <li>Stark must earn Gold or Silver on Amazon's safety score</li>
-                <li>You must have a Perfect or Meets Requirements rating</li>
-                <li>No major camera flags or severe events in the last 6 weeks</li>
-              </ul>
-            </div>
-            <div>
-              <a href="https://drive.google.com/file/d/1CWVesfvKWsSFn7wv7bGvHv6kLb20Mzec/view?usp=sharing" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">📘 View Full Explainer PDF →</a>
-            </div>
-            <div>
-              <a href="https://docs.google.com/spreadsheets/d/1gTmNlGNo_OH1zysEFvh7dAbvEibC5vgoGX6AMINxFWQ/edit?usp=sharing" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">📊 View Bonus Matrix Spreadsheet →</a>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
+          <select id="role" value={role} onChange={e=>setRole(e.target.value)} className="w-full border p-2 rounded">...
