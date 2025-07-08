@@ -193,7 +193,7 @@ export default function App() {
           </ul>
         )}
       </div>
-    <div className="mb-4">
+<div className="mb-4">
   <label className="flex items-center space-x-2">
     <input type="checkbox" checked={checkND} onChange={(e) => setCheckND(e.target.checked)} />
     <span className="font-medium">Would you like to check your Netradyne Bonus?</span>
@@ -203,6 +203,7 @@ export default function App() {
 {checkND && (
   <div className="bg-green-50 p-4 rounded-lg shadow mb-8">
     <h3 className="font-semibold mb-2">📸 Netradyne Bonus</h3>
+
     <label>Netradyne Status</label>
     <select value={netradyne} onChange={(e) => setNetradyne(e.target.value)} className="p-2 border rounded w-full mb-2">
       <option value="">--</option>
@@ -237,7 +238,8 @@ export default function App() {
   <details className="border rounded p-3">
     <summary className="font-medium cursor-pointer">What is a Performance Grade (A–F)?</summary>
     <p className="mt-2 text-sm text-gray-700">
-      Your Performance Grade is based on your last 13 weeks of overall Total Score.<br /><br />
+      Your Performance Grade is based on your last 13 weeks of overall Total Score.
+      <br /><br />
       <strong>A Grade:</strong> 10 weeks at 100%, rest at 90%+, 1 grace week at 70%+<br />
       <strong>B Grade:</strong> 5 weeks at 100%, rest at 90%+, 1 grace week at 70%+ or all 13 weeks at 90%+<br />
       <strong>C Grade:</strong> All other valid combinations<br />
@@ -250,7 +252,8 @@ export default function App() {
   <details className="border rounded p-3">
     <summary className="font-medium cursor-pointer">How is Weekly Rating determined?</summary>
     <p className="mt-2 text-sm text-gray-700">
-      Weekly Rating reflects how you performed this week — it's based on your Total Score plus any safety, attendance, or behavioral flags.<br /><br />
+      Weekly Rating reflects how you performed this week — it's based on your Total Score plus any safety, attendance, or behavioral flags.
+      <br /><br />
       <strong>Perfect:</strong> 100% score with zero flags<br />
       <strong>Meets Requirements:</strong> 83–99% with no major flags, or 100% with 1 minor flag<br />
       <strong>Needs Improvement:</strong> 70–82.99%, or 83–99% with minor flags<br />
@@ -262,19 +265,21 @@ export default function App() {
   <details className="border rounded p-3">
     <summary className="font-medium cursor-pointer">What are Call-out Penalties?</summary>
     <p className="mt-2 text-sm text-gray-700">
-      Call-outs directly reduce your Total Score and affect both Weekly Rating and Grade.<br /><br />
+      Call-outs directly reduce your Total Score and affect both Weekly Rating and Grade.
+      <br /><br />
       • <strong>Block-level Callout:</strong> -10 points (1 instance in 2 weeks)<br />
       • <strong>2+ Block Callouts:</strong> -15 points<br />
       • <strong>Load-level Callout:</strong> -17.1 points (1 instance in 6 weeks)<br />
       • <strong>2+ Load Callouts:</strong> -20 points<br /><br />
-      Block-level penalties last for 2 weeks. Load-level penalties last for 6 weeks. They affect bonus eligibility and can drop you to NI or AR.
+      Block penalties last 2 weeks. Load penalties last 6 weeks. They affect bonus eligibility and can drop you to NI or AR.
     </p>
   </details>
 
   <details className="border rounded p-3">
     <summary className="font-medium cursor-pointer">What is S-Tier?</summary>
     <p className="mt-2 text-sm text-gray-700">
-      S-Tier is a special performance tier reserved for drivers who achieve <strong>13 consecutive Perfect weeks</strong>.<br /><br />
+      S-Tier is a special performance tier reserved for drivers who achieve <strong>13 consecutive Perfect weeks</strong>.
+      <br /><br />
       Once unlocked, S-Tier grants access to the 5+ year payband — even if you haven't reached 5 years of tenure yet. However, you must maintain Perfect rating to stay in S-Tier.
     </p>
   </details>
@@ -293,21 +298,25 @@ export default function App() {
   <details className="border rounded p-3">
     <summary className="font-medium cursor-pointer">How does the Netradyne Bonus work?</summary>
     <p className="mt-2 text-sm text-gray-700">
-      The Netradyne Bonus is a separate quarterly incentive based on camera safety scores.<br /><br />
+      The Netradyne Bonus is a separate quarterly incentive based on camera safety scores.
+      <br /><br />
       • Stark must earn Gold or Silver on Amazon's safety score<br />
       • You must have a Perfect or Meets Requirements rating<br />
       • You must not have any major camera flags or severe events in the last 6 weeks<br /><br />
       If eligible, your Netradyne bonus accrues weekly and is paid out in a lump sum at the end of each quarter.
     </p>
-          </details>
+  </details>
 
-      <a
-        href="https://..."
-        target="_blank"
-        className="text-blue-600 hover:underline text-sm inline-block"
-      >
-        📘 View Full Explainer PDF →
-      </a>
-    </div>
+  <a
+    href="https://drive.google.com/file/d/1CWVesfvKWsSFn7wv7bGvHv6kLb20Mzec/view?usp=sharing"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="text-blue-600 hover:underline text-sm inline-block"
+  >
+    📘 View Full Explainer PDF →
+  </a>
+</div>
+
+</div>
   );
 }
