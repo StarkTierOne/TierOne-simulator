@@ -294,11 +294,11 @@ export default function App() {
             onClick={() => setShow39Exp(!show39Exp)}
             className="font-semibold text-blue-600"
           >
-            What’s the 39-Hour Guarantee? {show39Exp ? "▲" : "▼"}
+            What's the 39-Hour Guarantee? {show39Exp ? "▲" : "▼"}
           </button>
           {show39Exp && (
             <div className="text-sm pl-4">
-              If you have a Perfect rating, work at least 3 days, and have zero driver-initiated rejects, we’ll credit you up to 39 hours at your base rate even if you actually worked fewer.
+              If you have a Perfect rating, work at least 3 days, and have zero driver-initiated rejects, we'll credit you up to 39 hours at your base rate even if you actually worked fewer.
             </div>
           )}
           <div>
@@ -346,7 +346,7 @@ export default function App() {
             onClick={() => setShowLunchExp(!showLunchExp)}
             className="font-semibold text-blue-600"
           >
-            What’s the Paid Lunch Bonus? {showLunchExp ? "▲" : "▼"}
+            What's the Paid Lunch Bonus? {showLunchExp ? "▲" : "▼"}
           </button>
           {showLunchExp && (
             <div className="text-sm pl-4">
