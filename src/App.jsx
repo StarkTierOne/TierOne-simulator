@@ -279,7 +279,7 @@ export default function App() {
           </button>
           {showNDE && (
             <div className="text-sm pl-4">
-              The Netradyne Bonus is paid out quarterly if the company earns Gold or Silver status on Amazon’s camera safety score. You must not have NI or AR ratings or receive major camera flags to qualify. If eligible, your bonus accrues weekly and is paid as a lump sum at the end of the quarter.
+              The Netradyne Bonus is paid out quarterly if the company earns Gold or Silver status on Amazon's camera safety score. You must not have NI or AR ratings or receive major camera flags to qualify. If eligible, your bonus accrues weekly and is paid as a lump sum at the end of the quarter.
             </div>
           )}
         </div>
