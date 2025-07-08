@@ -251,5 +251,5 @@ export default function App() {
         </details>
       </div>
     </div>
-  ); // You can reinsert full JSX UI and FAQ here or request it directly
+  );
 }
