@@ -185,14 +185,54 @@ export default function TierOneBonusSimulator() {
       </div>
 
       {/* FAQ */}
-      <div className="mt-10 space-y-4 text-sm leading-relaxed">
-        <h2 className="text-xl font-semibold text-center mb-4">Frequently Asked Questions</h2>
-        <details className="border rounded p-3"><summary className="font-medium cursor-pointer">What is a Performance Grade (A–F)?</summary><p className="mt-2 text-gray-700">A = 10 weeks at 100%, rest ≥90%, 1 grace week ≥70%<br />B = 5 weeks at 100%, rest ≥90%, 1 grace week ≥70% or all 13 weeks ≥90%<br />C = All other valid combinations<br />D = 2+ weeks <70% or 6+ weeks between 70–83%<br />F = 5+ weeks <70% or all 13 weeks between 70–83%</p></details>
-        <details className="border rounded p-3"><summary className="font-medium cursor-pointer">How is Weekly Rating determined?</summary><p className="mt-2 text-gray-700">Perfect: 100% score, no flags<br />Meets: 83–99% + no major flags or 100% + 1 minor flag<br />NI: 70–82.99% or 83–99% with minor flags<br />AR: <70% or 3+ minor flags or any major flag</p></details>
-        <details className="border rounded p-3"><summary className="font-medium cursor-pointer">What disqualifies me from bonuses?</summary><p className="mt-2 text-gray-700">• Rating is NI or AR<br />• Major camera flag<br />• Didn’t meet Grade/Tenure/Scorecard threshold<br />• Recent severe event</p></details>
-        <details className="border rounded p-3"><summary className="font-medium cursor-pointer">What is S-Tier?</summary><p className="mt-2 text-gray-700">13 Perfect weeks in a row. Unlocks 5-year bonus rate. Must maintain Perfect to stay in.</p></details>
-        <details className="border rounded p-3"><summary className="font-medium cursor-pointer">How does the Netradyne Bonus work?</summary><p className="mt-2 text-gray-700">• Stark must earn Gold or Silver<br />• Rating = Perfect or Meets<br />• No severe events<br />Bonus accrues weekly and is paid at quarter-end</p></details>
-      </div>
-    </div>
-  );
-}
+<div className="mt-10 space-y-4 text-sm leading-relaxed">
+  <h2 className="text-xl font-semibold text-center mb-4">Frequently Asked Questions</h2>
+
+  <details className="border rounded p-3">
+    <summary className="font-medium cursor-pointer">What is a Performance Grade (A–F)?</summary>
+    <p className="mt-2 text-gray-700">
+      A = 10 weeks at 100%, rest ≥90%, 1 grace week ≥70%<br />
+      B = 5 weeks at 100%, rest ≥90%, 1 grace week ≥70% or all 13 weeks ≥90%<br />
+      C = All other valid combinations<br />
+      D = 2+ weeks &lt;70% or 6+ weeks between 70–83%<br />
+      F = 5+ weeks &lt;70% or all 13 weeks between 70–83%
+    </p>
+  </details>
+
+  <details className="border rounded p-3">
+    <summary className="font-medium cursor-pointer">How is Weekly Rating determined?</summary>
+    <p className="mt-2 text-gray-700">
+      Perfect: 100% score, no flags<br />
+      Meets: 83–99% + no major flags or 100% + 1 minor flag<br />
+      NI: 70–82.99% or 83–99% with minor flags<br />
+      AR: &lt;70% or 3+ minor flags or any major flag
+    </p>
+  </details>
+
+  <details className="border rounded p-3">
+    <summary className="font-medium cursor-pointer">What disqualifies me from bonuses?</summary>
+    <p className="mt-2 text-gray-700">
+      • Rating is NI or AR<br />
+      • Major camera flag<br />
+      • Didn’t meet Grade/Tenure/Scorecard threshold<br />
+      • Recent severe event
+    </p>
+  </details>
+
+  <details className="border rounded p-3">
+    <summary className="font-medium cursor-pointer">What is S-Tier?</summary>
+    <p className="mt-2 text-gray-700">
+      13 Perfect weeks in a row. Unlocks 5-year bonus rate. Must maintain Perfect to stay in.
+    </p>
+  </details>
+
+  <details className="border rounded p-3">
+    <summary className="font-medium cursor-pointer">How does the Netradyne Bonus work?</summary>
+    <p className="mt-2 text-gray-700">
+      • Stark must earn Gold or Silver<br />
+      • Rating = Perfect or Meets<br />
+      • No severe events<br />
+      Bonus accrues weekly and is paid at quarter-end
+    </p>
+  </details>
+</div>
