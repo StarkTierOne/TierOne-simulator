@@ -299,11 +299,15 @@ export default function App() {
       • You must not have any major camera flags or severe events in the last 6 weeks<br /><br />
       If eligible, your Netradyne bonus accrues weekly and is paid out in a lump sum at the end of each quarter.
     </p>
-  </details>
+          </details>
 
-  <a href="https://drive.google.com/file/d/1CWVesfvKWsSFn7wv7bGvHv6kLb20Mzec/view?usp=sharing" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-sm inline-block">
-    📘 View Full Explainer PDF →
-  </a>
-</div>
-</div>
+      <a
+        href="https://..."
+        target="_blank"
+        className="text-blue-600 hover:underline text-sm inline-block"
+      >
+        📘 View Full Explainer PDF →
+      </a>
+    </div>
   );
+}
