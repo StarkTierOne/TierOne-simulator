@@ -25,7 +25,7 @@ const BONUS_MATRIX = {
 };
 
 export default function App() {
-  // Focus helper
+  // Focus helper for hours field
   const focusHours = () => {
     const el = document.getElementById("hours");
     if (el) {
@@ -34,7 +34,7 @@ export default function App() {
     }
   };
 
-  // Core form state
+  // Core state
   const [role, setRole] = useState("");
   const [hours, setHours] = useState("");
   const [baseRate, setBaseRate] = useState("");
@@ -44,7 +44,7 @@ export default function App() {
   const [tenure, setTenure] = useState("");
   const [sTier, setSTier] = useState(false);
 
-  // Opt-in toggles
+  // Bonus toggles
   const [checkND, setCheckND] = useState(false);
   const [check39, setCheck39] = useState(false);
   const [checkLunch, setCheckLunch] = useState(false);
@@ -71,7 +71,7 @@ export default function App() {
   const [showDQ, setShowDQ] = useState(false);
   const [showNDW, setShowNDW] = useState(false);
 
-  // Reset S-Tier and opt-ins if rating changes away from Perfect
+  // Reset extras if rating changes
   useEffect(() => {
     if (rating !== "Perfect") {
       setSTier(false);
@@ -90,10 +90,11 @@ export default function App() {
     setLunchRate(""); setShowLunchExp(false);
   };
   const printResults = () => window.print();
+
   const getTenureIndex = () => {
     if (sTier && ["Fantastic Plus","Fantastic","Good","Fair"].includes(scorecard)) return 5;
-    const y = parseInt(tenure.replace("+",""),10);
-    return isNaN(y) ? 0 : Math.min(y,5);
+    const y = parseInt(tenure.replace("+",""), 10);
+    return isNaN(y) ? 0 : Math.min(y, 5);
   };
   const getBonusRate = () => {
     const key = rating === "Meets Requirements" ? "Meets Requirements" : rating;
@@ -110,15 +111,15 @@ export default function App() {
   const totalH = parseFloat(hours || 0);
   const otH = totalH > 40 ? totalH - 40 : 0;
 
-  // 39-Hour Guarantee (only if opted in)
-  const is39Elig = check39 && role === "Driver" && rating === "Perfect" && (parseInt(daysWorked,10) || 0) >= 3 && driverRejects === 0;
+  // 39-Hour Guarantee
+  const is39Elig = check39 && role === "Driver" && rating === "Perfect" && (parseInt(daysWorked,10)||0) >= 3 && driverRejects === 0;
   const credited39 = is39Elig ? Math.max(totalH,39) : totalH;
 
-  // Paid Lunch Bonus (only if opted in and A/B + Perfect)
+  // Lunch Bonus
   const isLunchElig = checkLunch && role === "Driver" && rating === "Perfect" && ["A","B"].includes(tier);
   const lunchAmt = isLunchElig ? (parseInt(daysWorked,10)||0)*(parseFloat(lunchRate)||0) : 0;
 
-  // Base & Totals
+  // Base & totals
   const base = role === "Driver" ? 24 : parseFloat(baseRate)||24;
   const newRate = (base + hourlyBonus).toFixed(2);
   const otPay = (base * 1.5 * otH).toFixed(2);
@@ -127,15 +128,14 @@ export default function App() {
   const baseOT = (base * credited39 + parseFloat(otPay)).toFixed(2);
   const totalPay = ((base + hourlyBonus) * credited39 + parseFloat(otPay) + lunchAmt).toFixed(2);
 
-  // Netradyne Bonus (only if opted in)
-  const isNDElig = checkND && ["Perfect","Meets Requirements"].includes(rating) && netradyne!=="None" && severeEvent==="No";
-  const netBonus = isNDElig ? (netradyne==="Gold"?20:10) : 0;
+  // Netradyne Bonus
+  const isNDElig = checkND && ["Perfect","Meets Requirements"].includes(rating) && netradyne !== "None" && severeEvent === "No";
+  const netBonus = isNDElig ? (netradyne === "Gold" ? 20 : 10) : 0;
 
   return (
     <div className="p-8 max-w-3xl mx-auto font-sans space-y-8">
       <h1 className="text-4xl font-bold text-center">TierOne Bonus Simulator</h1>
 
-      {/* Form */}
       <div className="bg-white p-6 rounded-lg shadow space-y-6">
         {/* Role */}
         <div>
@@ -148,43 +148,24 @@ export default function App() {
           </select>
         </div>
 
-        {/* Total Hours */}
+        {/* Hours */}
         <div>
           <label htmlFor="hours" className="block font-medium mb-1">Total Hours Worked (Optional)</label>
-          <input
-            id="hours"
-            type="number"
-            value={hours}
-            onChange={e => setHours(e.target.value)}
-            placeholder="e.g. 38.5"
-            className="w-full border p-2 rounded"
-          />
+          <input id="hours" type="number" value={hours} onChange={e => setHours(e.target.value)} placeholder="e.g. 38.5" className="w-full border p-2 rounded" />
         </div>
 
         {/* Base Rate */}
         {(role === "Trainer" || role === "Supervisor") && (
           <div>
             <label htmlFor="baseRate" className="block font-medium mb-1">Base Rate (Optional)</label>
-            <input
-              id="baseRate"
-              type="number"
-              value={baseRate}
-              onChange={e => setBaseRate(e.target.value)}
-              placeholder="e.g. 27"
-              className="w-full border p-2 rounded"
-            />
+            <input id="baseRate" type="number" value={baseRate} onChange={e => setBaseRate(e.target.value)} placeholder="e.g. 27" className="w-full border p-2 rounded" />
           </div>
         )}
 
         {/* Scorecard */}
         <div>
           <label htmlFor="scorecard" className="block font-medium mb-1">Amazon Scorecard</label>
-          <select
-            id="scorecard"
-            value={scorecard}
-            onChange={e => setScorecard(e.target.value)}
-            className="w-full border p-2 rounded"
-          >
+          <select id="scorecard" value={scorecard} onChange={e => setScorecard(e.target.value)} className="w-full border p-2 rounded">
             <option value="">-- Select scorecard --</option>
             <option>Fantastic Plus</option>
             <option>Fantastic</option>
@@ -197,12 +178,7 @@ export default function App() {
         {/* Rating */}
         <div>
           <label htmlFor="rating" className="block font-medium mb-1">Weekly Rating</label>
-          <select
-            id="rating"
-            value={rating}
-            onChange={e => setRating(e.target.value)}
-            className="w-full border p-2 rounded"
-          >
+          <select id="rating" value={rating} onChange={e => setRating(e.target.value)} className="w-full border p-2 rounded">
             <option value="">-- Select rating --</option>
             <option>Perfect</option>
             <option>Meets Requirements</option>
@@ -214,12 +190,7 @@ export default function App() {
         {/* Grade */}
         <div>
           <label htmlFor="tier" className="block font-medium mb-1">Performance Grade</label>
-          <select
-            id="tier"
-            value={tier}
-            onChange={e => setTier(e.target.value)}
-            className="w-full border p-2 rounded"
-          >
+          <select id="tier" value={tier} onChange={e => setTier(e.target.value)} className="w-full border p-2 rounded">
             <option value="">-- Select grade --</option>
             <option>A</option>
             <option>B</option>
@@ -230,14 +201,3 @@ export default function App() {
         </div>
 
         {/* Tenure */}
-        <div>
-          <label htmlFor="tenure" className="block font-medium mb-1">Years at Stark</label>
-          <select
-            id="tenure"
-            value={tenure}
-            onChange={e => setTenure(e.target.value)}
-            className="w-full border p-2 rounded"
-          >
-            <option value="">-- Select tenure --</option>
-            <option>&lt;1</option>
-            <option>1
