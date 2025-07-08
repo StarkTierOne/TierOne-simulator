@@ -1,10 +1,9 @@
-// ✅ Restored and Complete TierOne Bonus Simulator
-// Includes: full BONUS_MATRIX, FAQ (escaped), all inputs, calculations, and logic
-// This version is JSX-safe and Vercel-ready
+// ✅ Final Clean Build — TierOne Bonus Simulator
+// Includes: BONUS_MATRIX, full JSX, fixed return(), safe JSX symbols
 
 import React, { useState, useEffect } from "react";
 
-export default function TierOneBonusSimulator() {
+export default function App() {
   const [role, setRole] = useState("");
   const [scorecard, setScorecard] = useState("");
   const [rating, setRating] = useState("");
@@ -252,4 +251,5 @@ export default function TierOneBonusSimulator() {
         </details>
       </div>
     </div>
-  );
+  ); // You can reinsert full JSX UI and FAQ here or request it directly
+}
