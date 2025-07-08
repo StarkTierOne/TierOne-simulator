@@ -190,7 +190,7 @@ export default function App() {
         )}
    </div>
 }
-{/* Bonus Results Section */}
+{/* Bonus Results */}
 <div className="bg-blue-50 p-6 rounded-lg shadow mb-8">
   <h2 className="text-xl font-semibold mb-4">Bonus Results</h2>
   {!result ? (
@@ -208,7 +208,7 @@ export default function App() {
   )}
 </div>
 
-{/* Netradyne Toggle + Bonus */}
+{/* Netradyne Toggle */}
 <div className="mb-4">
   <label className="flex items-center space-x-2">
     <input type="checkbox" checked={checkND} onChange={(e) => setCheckND(e.target.checked)} />
@@ -219,6 +219,7 @@ export default function App() {
 {checkND && (
   <div className="bg-green-50 p-4 rounded-lg shadow mb-8">
     <h3 className="font-semibold mb-2">📸 Netradyne Bonus</h3>
+
     <label>Netradyne Status</label>
     <select value={netradyne} onChange={(e) => setNetradyne(e.target.value)} className="p-2 border rounded w-full mb-2">
       <option value="">--</option>
@@ -254,48 +255,49 @@ export default function App() {
   <details className="border rounded p-3">
     <summary className="font-medium cursor-pointer">What is a Performance Grade (A–F)?</summary>
     <p className="mt-2 text-sm text-gray-700">
-      Your Performance Grade is based on your last 13 weeks of overall Total Score.<br /><br />
-      <strong>A:</strong> 10 weeks at 100%, rest at 90%+, 1 grace week at 70%+<br />
-      <strong>B:</strong> 5 weeks at 100%, rest at 90%+, 1 grace week at 70%+, or all 13 weeks at 90%+<br />
-      <strong>C:</strong> All other valid combinations<br />
-      <strong>D:</strong> 2+ weeks below 70% or 6+ between 70–83%<br />
-      <strong>F:</strong> 5+ weeks below 70% or all 13 weeks between 70–83%
+      Your grade is based on your last 13 weeks of Total Score:<br /><br />
+      A = 10 weeks at 100%, rest ≥90%, 1 grace week ≥70%<br />
+      B = 5 weeks at 100%, rest ≥90%, 1 grace week ≥70% or all 13 weeks ≥90%<br />
+      C = Catch-all<br />
+      D = 2+ weeks below 70% or 6+ weeks between 70–83%<br />
+      F = 5+ weeks below 70% or 13 weeks between 70–83%
     </p>
   </details>
 
   <details className="border rounded p-3">
-    <summary className="font-medium cursor-pointer">How is Weekly Rating determined?</summary>
+    <summary className="font-medium cursor-pointer">What is Weekly Rating?</summary>
     <p className="mt-2 text-sm text-gray-700">
-      Based on your Total Score plus safety, attendance, or behavioral flags.<br /><br />
-      <strong>Perfect:</strong> 100% + no flags<br />
-      <strong>Meets Requirements:</strong> 83–99% and no major flag, or 100% with 1 minor flag<br />
-      <strong>Needs Improvement:</strong> 70–82.99%, or 83–99% with minor flags<br />
-      <strong>Action Required:</strong> &lt;70%, or any score with 3+ minor or 1 major flag
+      Rating is based on your Total Score + any safety/behavioral flags:<br /><br />
+      Perfect = 100% + No Flags<br />
+      Meets = 83–99% + no major flags, or 100% + 1 minor flag<br />
+      NI = 70–82.99%, or 83–99% + minor flags<br />
+      AR = &lt;70%, or 3+ minor or 1 major flag
     </p>
   </details>
 
   <details className="border rounded p-3">
     <summary className="font-medium cursor-pointer">What are Call-out Penalties?</summary>
     <p className="mt-2 text-sm text-gray-700">
-      • Block-level Callout = -10 pts (1x in 2 weeks)<br />
-      • 2+ Block Callouts = -15 pts<br />
-      • Load-level Callout = -17.1 pts (1x in 6 weeks)<br />
-      • 2+ Load Callouts = -20 pts<br /><br />
-      Block penalties last 2 weeks. Load penalties last 6 weeks.
+      • Block-level = -10 pts (1x in 2 wks), -15 pts (2+)<br />
+      • Load-level = -17.1 pts (1x in 6 wks), -20 pts (2+)<br />
+      Block penalties last 2 weeks, load penalties 6 weeks.
     </p>
   </details>
 
   <details className="border rounded p-3">
-    <summary className="font-medium cursor-pointer">What is S-Tier?</summary>
+    <summary className="font-medium cursor-pointer">How does S-Tier work?</summary>
     <p className="mt-2 text-sm text-gray-700">
-      Earned after 13 consecutive Perfect weeks. Grants access to the 5-year payband, even without 5 years of tenure. You must maintain Perfect rating to keep it.
+      S-Tier unlocks the 5-year bonus payband even if you haven’t reached 5 years. Requires 13 straight Perfect weeks to activate. You must maintain Perfect rating to stay in.
     </p>
   </details>
 
   <details className="border rounded p-3">
     <summary className="font-medium cursor-pointer">How does the Netradyne Bonus work?</summary>
     <p className="mt-2 text-sm text-gray-700">
-      Company must qualify (Gold/Silver). You must be Perfect or Meets, and have no major flags or severe events in the past 6 weeks. Bonus accrues weekly, paid quarterly.
+      • Company must earn Gold or Silver<br />
+      • You must be Perfect or Meets Requirements<br />
+      • No major flags or recent severe events<br /><br />
+      Bonus accrues weekly, paid quarterly.
     </p>
   </details>
 
