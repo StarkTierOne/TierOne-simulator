@@ -253,3 +253,41 @@ export default function App() {
       </div>
     </div>
   );
+<div className="mb-4">
+  <label className="flex items-center space-x-2">
+    <input type="checkbox" checked={checkND} onChange={(e) => setCheckND(e.target.checked)} />
+    <span className="font-medium">Would you like to check your Netradyne Bonus?</span>
+  </label>
+</div>
+
+{checkND && (
+  <div className="bg-green-50 p-4 rounded-lg shadow mb-8">
+    <h3 className="font-semibold mb-2">📸 Netradyne Bonus</h3>
+
+    <label>Netradyne Status</label>
+    <select value={netradyne} onChange={(e) => setNetradyne(e.target.value)} className="p-2 border rounded w-full mb-2">
+      <option value="">--</option>
+      <option>Gold</option>
+      <option>Silver</option>
+      <option>None</option>
+    </select>
+
+    <label>Any Severe Events in Last 6 Weeks?</label>
+    <select value={severeEvent} onChange={(e) => setSevereEvent(e.target.value)} className="p-2 border rounded w-full mb-2">
+      <option value="">--</option>
+      <option>No</option>
+      <option>Yes</option>
+    </select>
+
+    <p><strong>Bonus (if eligible):</strong> ${netradyneBonus}</p>
+
+    <details className="mt-2 text-sm text-gray-700">
+      <summary className="font-medium cursor-pointer">Netradyne Bonus Explainer</summary>
+      <p className="mt-2">
+        The Netradyne Bonus is paid out quarterly if the company earns Gold or Silver status on Amazon's camera safety score.
+        You must not have NI or AR ratings or receive major camera flags to qualify.
+        If eligible, your bonus accrues weekly and is paid as a lump sum at the end of the quarter.
+      </p>
+    </details>
+  </div>
+)}
