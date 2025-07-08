@@ -52,7 +52,8 @@ export default function App() {
   const getTenureIndex = () => sTier && scorecard === "Fantastic Plus" ? 5 : Math.min(parseInt(tenure) || 0, 5);
 
   const getBonusRate = () => {
-    const card = BONUS_MATRIX[scorecard]?.[rating];
+    const ratingKey = rating === "Meets" ? "Meets Requirements" : rating;
+    const card = BONUS_MATRIX[scorecard]?.[ratingKey];
     if (!card) return null;
     const tierKey = sTier ? "A" : (tier === "D" || tier === "F" ? "D & F" : tier);
     const rates = card[tierKey];
@@ -72,7 +73,7 @@ export default function App() {
   const totalHours = parseFloat(hours || 0);
   const otHours = totalHours > 40 ? totalHours - 40 : 0;
   const baseHours = Math.min(totalHours, 40);
-  const base = role === "Driver" ? 24 : parseFloat(baseRate || 0);
+  const base = role === "Driver" ? 24 : parseFloat(baseRate) || 24;
   const hourlyBonus = result ? parseFloat(result.bonusOnly) : 0;
   const newHourly = (base + hourlyBonus).toFixed(2);
   const otPay = (base * 1.5 * otHours).toFixed(2);
