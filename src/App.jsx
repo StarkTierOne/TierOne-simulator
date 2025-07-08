@@ -189,7 +189,6 @@ export default function App() {
           </>
         )}
    </div>
-  );
 }
 {/* Bonus Results Section */}
 <div className="bg-blue-50 p-6 rounded-lg shadow mb-8">
