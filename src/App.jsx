@@ -75,10 +75,13 @@ const BONUS_MATRIX = {
 };
 
 export default function App() {
-  // scroll & focus helper
+  // Scroll/focus helper
   const focusHours = () => {
     const el = document.getElementById("hours");
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" }) || el.focus();
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      el.focus();
+    }
   };
 
   // Core state
@@ -111,7 +114,7 @@ export default function App() {
   const [daysLunch, setDaysLunch] = useState("");
   const [showLunchExp, setShowLunchExp] = useState(false);
 
-  // FAQs toggles
+  // FAQ toggles
   const [showFAQ, setShowFAQ] = useState(false);
   const [showPG, setShowPG] = useState(false);
   const [showWR, setShowWR] = useState(false);
@@ -120,7 +123,7 @@ export default function App() {
   const [showDQ, setShowDQ] = useState(false);
   const [showNDW, setShowNDW] = useState(false);
 
-  // clear 39 & lunch if Supervisor
+  // Clear 39 & Lunch when Supervisor selected
   useEffect(() => {
     if (role === "Supervisor") {
       setCheck39(false);
@@ -128,7 +131,7 @@ export default function App() {
     }
   }, [role]);
 
-  // clear extras when rating changes
+  // Clear extras on rating change
   useEffect(() => {
     if (rating !== "Perfect") {
       setSTier(false);
@@ -137,77 +140,92 @@ export default function App() {
     }
   }, [rating]);
 
+  // Reset & print
   const resetForm = () => {
-    setRole(""); setHours(""); setBaseRate("");
-    setScorecard(""); setRating(""); setTier("");
-    setTenure(""); setSTier(false);
-    setCheckND(false); setCheck39(false); setCheckLunch(false);
-    setNetradyne(""); setSevereEvent(""); setShowNDE(false);
-    setDays39(""); setDRejects(""); setARejects(""); setShow39Exp(false);
-    setDaysLunch(""); setShowLunchExp(false);
+    setRole("");
+    setHours("");
+    setBaseRate("");
+    setScorecard("");
+    setRating("");
+    setTier("");
+    setTenure("");
+    setSTier(false);
+    setCheckND(false);
+    setCheck39(false);
+    setCheckLunch(false);
+    setNetradyne("");
+    setSevereEvent("");
+    setShowNDE(false);
+    setDays39("");
+    setDRejects("");
+    setARejects("");
+    setShow39Exp(false);
+    setDaysLunch("");
+    setShowLunchExp(false);
   };
   const printResults = () => window.print();
 
-  // bonus lookup
+  // Bonus lookup
   const getTenureIndex = () => {
-    if (sTier && ["Fantastic Plus","Fantastic","Good","Fair"].includes(scorecard)) return 5;
-    const y = parseInt(tenure.replace("+",""),10);
-    return isNaN(y) ? 0 : Math.min(y,5);
+    if (sTier && ["Fantastic Plus", "Fantastic", "Good", "Fair"].includes(scorecard)) return 5;
+    const y = parseInt(tenure.replace("+", ""), 10);
+    return isNaN(y) ? 0 : Math.min(y, 5);
   };
   const getBonusRate = () => {
-    const key = rating==="Meets Requirements"?"Meets Requirements":rating;
+    const key = rating === "Meets Requirements" ? "Meets Requirements" : rating;
     const card = BONUS_MATRIX[scorecard]?.[key];
     if (!card) return null;
-    const tk = sTier?"A":(["D","F"].includes(tier)?"D & F":tier);
+    const tk = sTier ? "A" : (["D", "F"].includes(tier) ? "D & F" : tier);
     const rate = card[tk]?.[getTenureIndex()] ?? 24;
-    return { hourly: Math.min(rate,32), bonusOnly: (Math.min(rate,32)-24).toFixed(2) };
+    return { hourly: Math.min(rate, 32), bonusOnly: (Math.min(rate, 32) - 24).toFixed(2) };
   };
-  const result          = useMemo(() => getBonusRate(), [scorecard,rating,tier,tenure,sTier]);
-  const hourlyBonus     = result ? parseFloat(result.bonusOnly) : 0;
+  const result = useMemo(() => getBonusRate(), [scorecard, rating, tier, tenure, sTier]);
+  const hourlyBonus = result ? parseFloat(result.bonusOnly) : 0;
 
-  // hours & OT
-  const totalH = parseFloat(hours||0);
-  const otH     = totalH > 40 ? totalH - 40 : 0;
+  // Hours & OT
+  const totalH = parseFloat(hours || 0);
+  const otH = totalH > 40 ? totalH - 40 : 0;
 
-  // base rate
-  const base = role === "Driver" ? 24 : (parseFloat(baseRate)||24);
+  // Base rate
+  const base = role === "Driver" ? 24 : (parseFloat(baseRate) || 24);
 
-  // 39-Hour Guarantee
-  const is39Elig = check39 &&
-    (role==="Driver"||role==="Trainer") &&
-    rating==="Perfect" &&
-    parseInt(days39||"0",10)>=3 &&
-    dRejects==="No";
-  const missingH     = is39Elig && totalH<39 ? 39 - totalH : 0;
+  // 39-Hour Guarantee pay
+  const is39Elig =
+    check39 &&
+    (role === "Driver" || role === "Trainer") &&
+    rating === "Perfect" &&
+    parseInt(days39 || "0", 10) >= 3 &&
+    dRejects === "No";
+  const missingH = is39Elig && totalH < 39 ? 39 - totalH : 0;
   const guaranteePay = (base * missingH).toFixed(2);
 
   // Lunch Bonus (½ hr/day)
   const lunchAmt = (checkLunch &&
-    (role==="Driver"||role==="Trainer") &&
-    rating==="Perfect" &&
-    ["A","B"].includes(tier))
-    ? ((base/2) * parseInt(daysLunch||"0",10)).toFixed(2)
+    (role === "Driver" || role === "Trainer") &&
+    rating === "Perfect" &&
+    ["A", "B"].includes(tier))
+    ? ((base / 2) * parseInt(daysLunch || "0", 10)).toFixed(2)
     : "0.00";
 
-  // Netradyne
+  // Netradyne bonus
   const netBonus = (checkND &&
-    ["Perfect","Meets Requirements"].includes(rating) &&
-    netradyne!=="None" &&
-    severeEvent==="No")
-    ? (netradyne==="Gold"?20:10)
+    ["Perfect", "Meets Requirements"].includes(rating) &&
+    netradyne !== "None" &&
+    severeEvent === "No")
+    ? (netradyne === "Gold" ? 20 : 10)
     : 0;
 
-  // totals
-  const newRate          = (base + hourlyBonus).toFixed(2);
-  const overtimeRate     = (base * 1.5).toFixed(2);
-  const overtimePay      = (base * 1.5 * otH).toFixed(2);
-  const hourlyBonusTotal = (hourlyBonus * Math.min(totalH,40)).toFixed(2);
-  const baseInclOT       = (base * totalH + parseFloat(overtimePay)).toFixed(2);
-  const totalPay         = (
-    parseFloat(baseInclOT)
-    + parseFloat(guaranteePay)
-    + parseFloat(lunchAmt)
-    + parseFloat(hourlyBonusTotal)
+  // Totals
+  const newRate = (base + hourlyBonus).toFixed(2);
+  const overtimeRate = (base * 1.5).toFixed(2);
+  const overtimePay = (base * 1.5 * otH).toFixed(2);
+  const hourlyBonusTotal = (hourlyBonus * Math.min(totalH, 40)).toFixed(2);
+  const baseInclOT = (base * totalH + parseFloat(overtimePay)).toFixed(2);
+  const totalPay = (
+    parseFloat(baseInclOT) +
+    parseFloat(guaranteePay) +
+    parseFloat(lunchAmt) +
+    parseFloat(hourlyBonusTotal)
   ).toFixed(2);
 
   return (
@@ -247,11 +265,9 @@ export default function App() {
         </div>
 
         {/* Base Rate */}
-        {(role==="Trainer"||role==="Supervisor") && (
+        {(role === "Trainer" || role === "Supervisor") && (
           <div>
-            <label className="block font-medium mb-1">
-              Base Rate (Optional)
-            </label>
+            <label className="block font-medium mb-1">Base Rate (Optional)</label>
             <input
               type="number"
               value={baseRate}
@@ -321,12 +337,7 @@ export default function App() {
             className="w-full border p-2 rounded"
           >
             <option value="">-- Select tenure --</option>
-            <option>&lt;1</option>
-            <option>1</option>
-            <option>2</option>
-            <option>3</option>
-            <option>4</option>
-            <option>5+</option>
+            <option>&lt;1</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5+</option>
           </select>
         </div>
 
@@ -336,13 +347,13 @@ export default function App() {
             type="checkbox"
             checked={sTier}
             onChange={e => setSTier(e.target.checked)}
-            disabled={rating!=="Perfect"}
+            disabled={rating !== "Perfect"}
             className="w-5 h-5"
           />
           <label className="font-medium">S-Tier (13 Perfect Weeks)</label>
         </div>
 
-        {/* Toggles */}
+        {/* Role-based Toggles */}
         <div className="space-y-2">
           <div className="flex items-center space-x-2">
             <input
@@ -351,11 +362,9 @@ export default function App() {
               onChange={e => setCheckND(e.target.checked)}
               className="w-5 h-5"
             />
-            <label className="font-medium">
-              Would you like to check your Netradyne Bonus?
-            </label>
+            <label className="font-medium">Would you like to check your Netradyne Bonus?</label>
           </div>
-          {(role==="Driver"||role==="Trainer") && rating==="Perfect" && (
+          {(role === "Driver" || role === "Trainer") && rating === "Perfect" && (
             <div className="flex items-center space-x-2">
               <input
                 type="checkbox"
@@ -363,12 +372,10 @@ export default function App() {
                 onChange={e => setCheck39(e.target.checked)}
                 className="w-5 h-5"
               />
-              <label className="font-medium">
-                Would you like to check if you qualify for the 39-Hour Guarantee?
-              </label>
+              <label className="font-medium">Would you like to check if you qualify for the 39-Hour Guarantee?</label>
             </div>
           )}
-          {(role==="Driver"||role==="Trainer") && rating==="Perfect" && ["A","B"].includes(tier) && (
+          {(role === "Driver" || role === "Trainer") && rating === "Perfect" && ["A","B"].includes(tier) && (
             <div className="flex items-center space-x-2">
               <input
                 type="checkbox"
@@ -376,15 +383,13 @@ export default function App() {
                 onChange={e => setCheckLunch(e.target.checked)}
                 className="w-5 h-5"
               />
-              <label className="font-medium">
-                Would you like to check if you qualify for the Paid Lunch Bonus?
-              </label>
+              <label className="font-medium">Would you like to check if you qualify for the Paid Lunch Bonus?</label>
             </div>
           )}
         </div>
       </div>
 
-      {/* Netradyne */}
+      {/* Netradyne Section */}
       {checkND && (
         <div className="bg-green-50 p-6 rounded-lg shadow space-y-4">
           <h2 className="text-2xl font-semibold">📸 Netradyne Bonus</h2>
@@ -394,7 +399,10 @@ export default function App() {
             onChange={e => setNetradyne(e.target.value)}
             className="w-full border p-2 rounded"
           >
-            <option value="">--</option><option>Gold</option><option>Silver</option><option>None</option>
+            <option value="">--</option>
+            <option>Gold</option>
+            <option>Silver</option>
+            <option>None</option>
           </select>
           <label className="block font-medium">Any Severe Events in Last 6 Weeks?</label>
           <select
@@ -402,36 +410,42 @@ export default function App() {
             onChange={e => setSevereEvent(e.target.value)}
             className="w-full border p-2 rounded"
           >
-            <option value="">--</option><option>No</option><option>Yes</option>
+            <option value="">--</option>
+            <option>No</option>
+            <option>Yes</option>
           </select>
           <p className="font-medium">Netradyne Bonus: ${netBonus.toFixed(2)}</p>
           <button
             className="font-semibold text-blue-600"
             onClick={() => setShowNDE(!showNDE)}
           >
-            Bonus Explainer {showNDE?"▲":"▼"}
+            Bonus Explainer {showNDE ? "▲" : "▼"}
           </button>
           {showNDE && (
             <div className="text-sm pl-4">
-              The Netradyne Bonus is a separate quarterly incentive based on camera safety scores.<br/>
-              • Stark must earn Gold or Silver on Amazon's safety score<br/>
-              • You must have a Perfect or Meets Requirements rating<br/>
-              • You must not have any major camera flags or severe events in the last 6 weeks<br/>
+              The Netradyne Bonus is a separate quarterly incentive based on camera safety scores.
+              <br />
+              • Stark must earn Gold or Silver on Amazon's safety score
+              <br />
+              • You must have a Perfect or Meets Requirements rating
+              <br />
+              • You must not have any major camera flags or severe events in the last 6 weeks
+              <br />
               If eligible, your Netradyne bonus accrues weekly and is paid out in a lump sum at the end of each quarter.
             </div>
           )}
         </div>
       )}
 
-      {/* 39-Hour Guarantee */}
-      {check39 && (role==="Driver"||role==="Trainer") && (
+      {/* 39-Hour Guarantee Section */}
+      {check39 && (role === "Driver" || role === "Trainer") && (
         <div className="bg-blue-50 p-6 rounded-lg shadow space-y-4">
           <h2 className="text-2xl font-semibold">🕒 39-Hour Guarantee</h2>
           <button
             className="font-semibold text-blue-600"
             onClick={() => setShow39Exp(!show39Exp)}
           >
-            What’s the 39-Hour Guarantee? {show39Exp?"▲":"▼"}
+            What’s the 39-Hour Guarantee? {show39Exp ? "▲" : "▼"}
           </button>
           {show39Exp && (
             <div className="text-sm pl-4">
@@ -445,7 +459,9 @@ export default function App() {
             className="w-full border p-2 rounded"
           >
             <option value="">--</option>
-            {Array.from({length:7},(_,i)=><option key={i} value={i+1}>{i+1}</option>)}
+            {Array.from({ length: 7 }, (_, i) => (
+              <option key={i} value={i+1}>{i+1}</option>
+            ))}
           </select>
           <label className="block font-medium">Driver-Rejected Legs?</label>
           <select
@@ -466,15 +482,15 @@ export default function App() {
         </div>
       )}
 
-      {/* Paid Lunch Bonus */}
-      {checkLunch && (role==="Driver"||role==="Trainer") && (
+      {/* Paid Lunch Bonus Section */}
+      {checkLunch && (role === "Driver" || role === "Trainer") && (
         <div className="bg-yellow-50 p-6 rounded-lg shadow space-y-4">
           <h2 className="text-2xl font-semibold">🍽️ Paid Lunch Bonus</h2>
           <button
             className="font-semibold text-blue-600"
             onClick={() => setShowLunchExp(!showLunchExp)}
           >
-            What’s the Paid Lunch Bonus? {showLunchExp?"▲":"▼"}
+            What’s the Paid Lunch Bonus? {showLunchExp ? "▲" : "▼"}
           </button>
           {showLunchExp && (
             <div className="text-sm pl-4">
@@ -488,7 +504,9 @@ export default function App() {
             className="w-full border p-2 rounded"
           >
             <option value="">--</option>
-            {Array.from({length:7},(_,i)=><option key={i} value={i+1}>{i+1}</option>)}
+            {Array.from({ length: 7 }, (_, i) => (
+              <option key={i} value={i+1}>{i+1}</option>
+            ))}
           </select>
         </div>
       )}
@@ -503,15 +521,29 @@ export default function App() {
           <li>Overtime Rate (Base × 1.5): ${overtimeRate}/hr</li>
           <li>Overtime Total Pay: ${overtimePay}</li>
           <li>Hour worked Base Pay (incl. OT): ${baseInclOT}</li>
-          {(role==="Driver"||role==="Trainer") && check39 && (
-            <li>39-Hour Guarantee Pay: ${guaranteePay}</li>
+          {check39 && (role === "Driver" || role === "Trainer") && (
+            <li>
+              39-Hour Guarantee Pay:{" "}
+              {hours
+                ? `$${guaranteePay}`
+                : <span onClick={focusHours} className="text-blue-600 underline cursor-pointer">
+                    Click to add hours
+                  </span>
+              }
+            </li>
           )}
-          {(role==="Driver"||role==="Trainer") && checkLunch && (
+          {checkLunch && (role === "Driver" || role === "Trainer") && (
             <li>Lunch Bonus Total: ${lunchAmt}</li>
           )}
           <li>Hourly Bonus Total Pay: ${hourlyBonusTotal}</li>
           <li>
-            <strong>Total Weekly Pay (with Bonuses):</strong> ${totalPay}
+            <strong>Total Weekly Pay (with Bonuses):</strong>{" "}
+            {hours
+              ? `$${totalPay}`
+              : <span onClick={focusHours} className="text-blue-600 underline cursor-pointer">
+                  *Click to add hours
+                </span>
+            }
           </li>
         </ul>
         <div className="flex space-x-4">
@@ -526,20 +558,14 @@ export default function App() {
 
       {/* FAQs */}
       <div className="space-y-4">
-        <button
-          onClick={() => setShowFAQ(!showFAQ)}
-          className="font-semibold"
-        >
+        <button onClick={() => setShowFAQ(!showFAQ)} className="font-semibold">
           Frequently Asked Questions {showFAQ ? "▲" : "▼"}
         </button>
         {showFAQ && (
           <div className="text-sm space-y-4 pl-4">
             {/* 1 */}
             <div>
-              <button
-                onClick={() => setShowPG(!showPG)}
-                className="font-medium"
-              >
+              <button onClick={() => setShowPG(!showPG)} className="font-medium">
                 What is a Performance Grade (A–F)? {showPG ? "▲" : "▼"}
               </button>
               {showPG && (
@@ -560,10 +586,7 @@ export default function App() {
             </div>
             {/* 2 */}
             <div>
-              <button
-                onClick={() => setShowWR(!showWR)}
-                className="font-medium"
-              >
+              <button onClick={() => setShowWR(!showWR)} className="font-medium">
                 How is Weekly Rating determined? {showWR ? "▲" : "▼"}
               </button>
               {showWR && (
@@ -582,10 +605,7 @@ export default function App() {
             </div>
             {/* 3 */}
             <div>
-              <button
-                onClick={() => setShowCP(!showCP)}
-                className="font-medium"
-              >
+              <button onClick={() => setShowCP(!showCP)} className="font-medium">
                 What are Call-out Penalties? {showCP ? "▲" : "▼"}
               </button>
               {showCP && (
@@ -608,10 +628,7 @@ export default function App() {
             </div>
             {/* 4 */}
             <div>
-              <button
-                onClick={() => setShowST(!showST)}
-                className="font-medium"
-              >
+              <button onClick={() => setShowST(!showST)} className="font-medium">
                 What is S-Tier? {showST ? "▲" : "▼"}
               </button>
               {showST && (
@@ -622,10 +639,7 @@ export default function App() {
             </div>
             {/* 5 */}
             <div>
-              <button
-                onClick={() => setShowDQ(!showDQ)}
-                className="font-medium"
-              >
+              <button onClick={() => setShowDQ(!showDQ)} className="font-medium">
                 What disqualifies me from getting a bonus? {showDQ ? "▲" : "▼"}
               </button>
               {showDQ && (
@@ -642,10 +656,7 @@ export default function App() {
             </div>
             {/* 6 */}
             <div>
-              <button
-                onClick={() => setShowNDW(!showNDW)}
-                className="font-medium"
-              >
+              <button onClick={() => setShowNDW(!showNDW)} className="font-medium">
                 How does the Netradyne Bonus work? {showNDW ? "▲" : "▼"}
               </button>
               {showNDW && (
