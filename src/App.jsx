@@ -547,7 +547,7 @@ export default function App() {
           <li>New Hourly Rate (Base + Bonus): ${newRate}/hr</li>
           <li>Overtime Rate (Base × 1.5): ${overtimeRate}/hr</li>
           <li>Overtime Total Pay: ${overtimePay}</li>
-          <li>Hour worked Base Pay (incl. OT): ${baseInclOT}</li>
+          <li>Hours worked Base Pay (incl. OT): ${baseInclOT}</li>
           {(role === "Driver" || role === "Trainer") && check39 && (
             <li>
               39-Hour Guarantee Pay:{" "}
