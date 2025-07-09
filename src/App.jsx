@@ -25,6 +25,7 @@ const BONUS_MATRIX = {
 };
 
 export default function App() {
+  // Scroll/focus helper
   const focusHours = () => {
     const el = document.getElementById("hours");
     if (el) {
@@ -112,7 +113,10 @@ export default function App() {
 
   // Hours & OT
   const totalH = parseFloat(hours||0);
-  const otH = totalH>40 ? totalH-40 : 0;
+  const otH = totalH > 40 ? totalH - 40 : 0;
+
+  // Base rate
+  const base = role==="Driver" ? 24 : (parseFloat(baseRate)||24);
 
   // 39-Hour Guarantee
   const is39Elig = check39
@@ -120,32 +124,33 @@ export default function App() {
     && rating==="Perfect"
     && parseInt(daysWorked39||"0",10) >= 3
     && driverRejects === "No";
-  const missingH = is39Elig && totalH<39 ? (39 - totalH) : 0;
-  const guaranteePay = (24 * missingH).toFixed(2);
+  const missingH = is39Elig && totalH < 39 ? (39 - totalH) : 0;
+  const guaranteePay = (base * missingH).toFixed(2);
 
-  // Lunch Bonus: half-hour each day = 0.5 * base * days
-  const base = role==="Driver" ? 24 : (parseFloat(baseRate)||24);
+  // Lunch Bonus (½ hr per day)
   const lunchAmt = (checkLunch
+    && role==="Driver"
     && rating==="Perfect"
     && ["A","B"].includes(tier))
-    ? ((base/2) * (parseInt(daysWorkedLunch||"0",10))).toFixed(2)
+    ? ((base / 2) * parseInt(daysWorkedLunch||"0",10)).toFixed(2)
     : "0.00";
 
   // Netradyne
   const netBonus = (checkND
     && ["Perfect","Meets Requirements"].includes(rating)
-    && netradyne!=="None"
-    && severeEvent==="No")
-    ? (netradyne==="Gold"?20:10)
+    && netradyne !== "None"
+    && severeEvent === "No")
+    ? (netradyne === "Gold" ? 20 : 10)
     : 0;
 
   // Totals
   const newRate = (base + hourlyBonus).toFixed(2);
-  const otPay = (base * 1.5 * otH).toFixed(2);
-  const performanceTotal = (hourlyBonus * Math.min(totalH,40)).toFixed(2);
-  const baseOT = (base * totalH + parseFloat(otPay)).toFixed(2);
+  const overtimeRate = (base * 1.5).toFixed(2);
+  const overtimePay = (base * 1.5 * otH).toFixed(2);
+  const weeklyBonusTotal = (hourlyBonus * Math.min(totalH,40)).toFixed(2);
+  const baseInclOT = (base * totalH + parseFloat(overtimePay)).toFixed(2);
   const totalPay = (
-    parseFloat(baseOT)
+    parseFloat(baseInclOT)
     + parseFloat(guaranteePay)
     + parseFloat(lunchAmt)
   ).toFixed(2);
@@ -181,7 +186,7 @@ export default function App() {
           />
         </div>
         {/* Base Rate */}
-        {(role==="Trainer"||role==="Supervisor")&&(
+        {(role==="Trainer"||role==="Supervisor") && (
           <div>
             <label className="block font-medium mb-1">Base Rate (Optional)</label>
             <input
@@ -259,28 +264,26 @@ export default function App() {
             />
             <label className="font-medium">Would you like to check your Netradyne Bonus?</label>
           </div>
-          {checkND && (
-            <div className="ml-6 space-y-2">
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  checked={check39}
-                  onChange={e=>setCheck39(e.target.checked)}
-                  className="w-5 h-5"
-                />
-                <label className="font-medium">Would you like to check if you qualify for the 39-Hour Guarantee?</label>
-              </div>
-              {check39 && (
-                <div className="ml-6 flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={checkLunch}
-                    onChange={e=>setCheckLunch(e.target.checked)}
-                    className="w-5 h-5"
-                  />
-                  <label className="font-medium">Would you like to check if you qualify for the Paid Lunch Bonus?</label>
-                </div>
-              )}
+          {role==="Driver" && rating==="Perfect" && (
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={check39}
+                onChange={e=>setCheck39(e.target.checked)}
+                className="w-5 h-5"
+              />
+              <label className="font-medium">Would you like to check if you qualify for the 39-Hour Guarantee?</label>
+            </div>
+          )}
+          {role==="Driver" && rating==="Perfect" && ["A","B"].includes(tier) && (
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={checkLunch}
+                onChange={e=>setCheckLunch(e.target.checked)}
+                className="w-5 h-5"
+              />
+              <label className="font-medium">Would you like to check if you qualify for the Paid Lunch Bonus?</label>
             </div>
           )}
         </div>
@@ -304,10 +307,7 @@ export default function App() {
           </button>
           {showNDE && (
             <div className="text-sm pl-4">
-              The Netradyne Bonus is paid quarterly if the company
-              achieves Gold or Silver on Amazon’s safety score. You
-              must not have NI/AR ratings or major camera flags. Paid
-              lump-sum at quarter-end.
+              The Netradyne Bonus is paid out quarterly if the company earns Gold or Silver status on Amazon's camera safety score. You must not have NI or AR ratings or receive major camera flags to qualify. If eligible, your bonus accrues weekly and is paid as a lump sum at the end of the quarter.
             </div>
           )}
         </div>
@@ -322,9 +322,7 @@ export default function App() {
           </button>
           {show39Exp && (
             <div className="text-sm pl-4">
-              If you have a Perfect rating, work at least 3 days, and have zero
-              driver-initiated rejects, we’ll credit you up to 39 hours at your
-              base rate even if you actually worked fewer.
+              If you have a Perfect rating, work at least 3 days, and have zero driver-initiated rejects, we’ll credit you up to 39 hours at your base rate even if you actually worked fewer.
             </div>
           )}
           <label className="block font-medium">Days Worked</label>
@@ -352,8 +350,7 @@ export default function App() {
           </button>
           {showLunchExp && (
             <div className="text-sm pl-4">
-              As long as you have a Perfect rating and Grade A or B, you earn
-              a lunch bonus for each day worked.
+              As long as you have a Perfect rating and Grade A or B, you earn a lunch bonus for each day worked.
             </div>
           )}
           <label className="block font-medium">Days Worked</label>
@@ -364,21 +361,20 @@ export default function App() {
         </div>
       )}
 
-      {/* TIERONE BONUS RESULTS */}
+      {/* BONUS RESULTS */}
       <div className="bg-white p-6 rounded-lg shadow space-y-4">
-        <h3 className="text-xl font-semibold">TierOne Bonus Results</h3>
+        <h3 className="text-xl font-semibold">Bonus Results</h3>
         <ul className="list-disc ml-6 space-y-1">
           <li>Your Base Rate: ${base.toFixed(2)}</li>
           <li>Hourly Bonus: +${hourlyBonus.toFixed(2)}/hr</li>
           <li>New Hourly Pay (Base + Bonus): ${newRate}/hr</li>
-          <li>Overtime Rate (Base × 1.5): ${ (base * 1.5).toFixed(2) }/hr</li>
+          <li>Overtime Rate (Base × 1.5): ${overtimeRate}/hr</li>
+          <li>Overtime Pay: ${overtimePay}</li>
+          <li>Base Pay (incl. OT): ${baseInclOT}</li>
           {check39 && <li>39-Hour Guarantee Pay: ${guaranteePay}</li>}
           {checkLunch && <li>Lunch Bonus Total: ${lunchAmt}</li>}
-          <li>Weekly Bonus Total (Max 40 hrs): ${performanceTotal}</li>
-          <li>Base Pay (incl. OT): ${baseOT}</li>
-          <li>
-            <strong>Total Weekly Pay (with Bonus):</strong> ${totalPay}
-          </li>
+          <li>Weekly Bonus Total (Max 40 hrs): ${weeklyBonusTotal}</li>
+          <li><strong>Total Weekly Pay (with Bonus):</strong> ${totalPay}</li>
         </ul>
         <div className="flex space-x-4">
           <button onClick={resetForm} className="px-4 py-2 border rounded">Reset</button>
@@ -431,9 +427,9 @@ export default function App() {
               </button>
               {showCP && (
                 <div className="mt-1">
-                  <p>• Block-level Callout: –10 points (1 in 2 weeks)</p>
+                  <p>• Block-level Callout: –10 points (1 instance in 2 weeks)</p>
                   <p>• 2+ Block Callouts: –15 points</p>
-                  <p>• Load-level Callout: –17.1 points (1 in 6 weeks)</p>
+                  <p>• Load-level Callout: –17.1 points (1 instance in 6 weeks)</p>
                   <p>• 2+ Load-level Callouts: –20 points</p>
                   <p>Penalties last 2 weeks for blocks, 6 weeks for loads.</p>
                 </div>
@@ -447,9 +443,7 @@ export default function App() {
               {showST && (
                 <div className="mt-1">
                   <p>
-                    S-Tier is reserved for drivers with 13 consecutive Perfect weeks.
-                    Once unlocked, it grants access to the 5+ year payband—but you
-                    must maintain Perfect rating to stay in S-Tier.
+                    S-Tier is reserved for drivers with 13 consecutive Perfect weeks. Once unlocked, it grants access to the 5+ year payband—but you must maintain Perfect rating to stay in S-Tier.
                   </p>
                 </div>
               )}
@@ -475,11 +469,7 @@ export default function App() {
               </button>
               {showNDW && (
                 <div className="mt-1">
-                  <p>The Netradyne Bonus is a quarterly camera-safety incentive.</p>
-                  <p>• Company must earn Gold or Silver</p>
-                  <p>• Driver must have Perfect/Meets Requirements rating</p>
-                  <p>• No major camera flags or severe events in last 6 weeks</p>
-                  <p>Paid lump-sum at quarter-end.</p>
+                  <p>The Netradyne Bonus is paid out quarterly if the company earns Gold or Silver status on Amazon's camera safety score. You must not have NI or AR ratings or receive major camera flags to qualify. If eligible, your bonus accrues weekly and is paid as a lump sum at the end of the quarter.</p>
                 </div>
               )}
             </div>
