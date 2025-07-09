@@ -78,7 +78,10 @@ export default function App() {
   // Scroll/focus helper
   const focusHours = () => {
     const el = document.getElementById("hours");
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" }) || el.focus();
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      el.focus();
+    }
   };
 
   // Core state
@@ -120,7 +123,7 @@ export default function App() {
   const [showDQ, setShowDQ] = useState(false);
   const [showNDW, setShowNDW] = useState(false);
 
-  // Clear 39 & Lunch when Supervisor selected
+  // Clear 39 & Lunch when switching to Supervisor
   useEffect(() => {
     if (role === "Supervisor") {
       setCheck39(false);
@@ -163,8 +166,7 @@ export default function App() {
 
   // Bonus lookup
   const getTenureIndex = () => {
-    if (sTier && ["Fantastic Plus", "Fantastic", "Good", "Fair"].includes(scorecard))
-      return 5;
+    if (sTier && ["Fantastic Plus", "Fantastic", "Good", "Fair"].includes(scorecard)) return 5;
     const y = parseInt(tenure.replace("+", ""), 10);
     return isNaN(y) ? 0 : Math.min(y, 5);
   };
@@ -228,6 +230,13 @@ export default function App() {
     parseFloat(lunchAmt) +
     parseFloat(hourlyBonusTotal)
   ).toFixed(2);
+
+  // Clickable badge for missing hours
+  const HourClickBadge = (
+    <span onClick={focusHours} className="text-yellow-600 cursor-pointer ml-2">
+      *Click to add hours*
+    </span>
+  );
 
   return (
     <div className="p-8 max-w-3xl mx-auto font-sans space-y-8">
@@ -359,7 +368,7 @@ export default function App() {
           <label className="font-medium">S-Tier (13 Perfect Weeks)</label>
         </div>
 
-        {/* Role-based Toggles */}
+        {/* Toggles */}
         <div className="space-y-2">
           <div className="flex items-center space-x-2">
             <input
@@ -368,10 +377,9 @@ export default function App() {
               onChange={(e) => setCheckND(e.target.checked)}
               className="w-5 h-5"
             />
-            <label className="font-medium">
-              Would you like to check your Netradyne Bonus?
-            </label>
-          </div>
+            <label className="font-medium">Would you like to check your Netradyne Bonus?</label
+          ></div>
+
           {(role === "Driver" || role === "Trainer") && rating === "Perfect" && (
             <div className="flex items-center space-x-2">
               <input
@@ -385,6 +393,7 @@ export default function App() {
               </label>
             </div>
           )}
+
           {(role === "Driver" || role === "Trainer") &&
             rating === "Perfect" &&
             ["A", "B"].includes(tier) && (
@@ -403,7 +412,7 @@ export default function App() {
         </div>
       </div>
 
-      {/* Netradyne */}
+      {/* NETRADYNE */}
       {checkND && (
         <div className="bg-green-50 p-6 rounded-lg shadow space-y-4">
           <h2 className="text-2xl font-semibold">📸 Netradyne Bonus</h2>
@@ -418,9 +427,7 @@ export default function App() {
             <option>Silver</option>
             <option>None</option>
           </select>
-          <label className="block font-medium">
-            Any Severe Events in Last 6 Weeks?
-          </label>
+          <label className="block font-medium">Any Severe Events in Last 6 Weeks?</label>
           <select
             value={severeEvent}
             onChange={(e) => setSevereEvent(e.target.value)}
@@ -439,14 +446,11 @@ export default function App() {
           </button>
           {showNDE && (
             <div className="text-sm pl-4">
-              The Netradyne Bonus is a separate quarterly incentive based on
-              camera safety scores.<br />
-              • Stark must earn Gold or Silver on Amazon's safety score<br />
-              • You must have a Perfect or Meets Requirements rating<br />
-              • You must not have any major camera flags or severe events in the
-              last 6 weeks<br />
-              If eligible, your Netradyne bonus accrues weekly and is paid out in
-              a lump sum at the end of the quarter.
+              The Netradyne Bonus is a separate quarterly incentive based on camera safety scores.<br/>
+              • Stark must earn Gold or Silver on Amazon's safety score<br/>
+              • You must have a Perfect or Meets Requirements rating<br/>
+              • You must not have any major camera flags or severe events in the last 6 weeks<br/>
+              If eligible, your Netradyne bonus accrues weekly and is paid out in a lump sum at the end of each quarter.
             </div>
           )}
         </div>
@@ -464,9 +468,7 @@ export default function App() {
           </button>
           {show39Exp && (
             <div className="text-sm pl-4">
-              If you worked less than 39 hours, have a Perfect rating, worked at
-              least 3 days that week, and have zero driver-initiated rejects, we’ll
-              credit you up to 39 hours at $24/hour even if you actually worked fewer.
+              If you worked fewer than 39 hours but have a Perfect rating, worked at least 3 days, and have zero driver-initiated rejects, we’ll credit you up to 39 hours at $24/hr even if you actually worked less.
             </div>
           )}
           <label className="block font-medium">Days Worked</label>
@@ -517,8 +519,7 @@ export default function App() {
           </button>
           {showLunchExp && (
             <div className="text-sm pl-4">
-              As long as you have a Perfect rating and Grade A or B, you earn a
-              lunch bonus for each day worked.
+              As long as you have a Perfect rating and Grade A or B, you earn a lunch bonus for each day worked.
             </div>
           )}
           <label className="block font-medium">Days Worked</label>
@@ -548,14 +549,20 @@ export default function App() {
           <li>Overtime Total Pay: ${overtimePay}</li>
           <li>Hour worked Base Pay (incl. OT): ${baseInclOT}</li>
           {(role === "Driver" || role === "Trainer") && check39 && (
-            <li>39-Hour Guarantee Pay: ${guaranteePay}</li>
+            <li>
+              39-Hour Guarantee Pay:{" "}
+              {hours ? `$${guaranteePay}` : `$0.00`}
+              {!hours && HourClickBadge}
+            </li>
           )}
           {(role === "Driver" || role === "Trainer") && checkLunch && (
             <li>Lunch Bonus Total: ${lunchAmt}</li>
           )}
           <li>Hourly Bonus Total Pay: ${hourlyBonusTotal}</li>
           <li>
-            <strong>Total Weekly Pay (with Bonuses):</strong> ${totalPay}
+            <strong>Total Weekly Pay (with Bonuses):</strong>{" "}
+            {hours ? `$${totalPay}` : `$0.00`}
+            {!hours && HourClickBadge}
           </li>
         </ul>
         <div className="flex space-x-4">
@@ -570,133 +577,127 @@ export default function App() {
 
       {/* FAQs */}
       <div className="space-y-4">
-        <button
-          onClick={() => setShowFAQ(!showFAQ)}
-          className="font-semibold"
-        >
+        <button onClick={() => setShowFAQ(!showFAQ)} className="font-semibold">
           Frequently Asked Questions {showFAQ ? "▲" : "▼"}
         </button>
         {showFAQ && (
           <div className="text-sm space-y-4 pl-4">
             {/* 1 */}
             <div>
-              <button
-                onClick={() => setShowPG(!showPG)}
-                className="font-medium"
-              >
+              <button onClick={() => setShowPG(!showPG)} className="font-medium">
                 What is a Performance Grade (A–F)? {showPG ? "▲" : "▼"}
               </button>
               {showPG && (
                 <div className="mt-1">
-                  Your Performance Grade is based on your last 13 weeks of
-                  overall Total Score.<br/>
-                  A Grade: 10 weeks at 100%, rest at 90%+, 1 grace week at 70%+<br/>
-                  B Grade: 5 weeks at 100%, rest at 90%+, 1 grace week at 70%+ or
-                  all 13 weeks at 90%+<br/>
-                  C Grade: All other combinations<br/>
-                  D Grade: 2+ weeks below 70% or 6+ weeks between 70–83% or a
-                  combination of each<br/>
-                  F Grade: 5+ weeks below 70% or all 13 weeks between 70–83% or a
-                  combination of each
+                  Your Performance Grade is based on your last 13 weeks of overall Total Score.
+                  <br />
+                  A Grade: 10 weeks at 100%, rest at 90%+, 1 grace week at 70%+
+                  <br />
+                  B Grade: 5 weeks at 100%, rest at 90%+, 1 grace week at 70%+ or all 13 weeks at 90%+
+                  <br />
+                  C Grade: All other combinations
+                  <br />
+                  D Grade: 2+ weeks below 70% or 6+ weeks between 70–83% or a combination
+                  <br />
+                  F Grade: 5+ weeks below 70% or all 13 weeks between 70–83% or a combination
                 </div>
               )}
             </div>
+
             {/* 2 */}
             <div>
-              <button
-                onClick={() => setShowWR(!showWR)}
-                className="font-medium"
-              >
+              <button onClick={() => setShowWR(!showWR)} className="font-medium">
                 How is Weekly Rating determined? {showWR ? "▲" : "▼"}
               </button>
               {showWR && (
                 <div className="mt-1">
-                  Weekly Rating reflects how you performed this week — it's based
-                  on your Total Score plus any safety, attendance, or behavioral
-                  flags.<br/>
-                  Perfect: 100% score with zero flags<br/>
-                  Meets Requirements: 83–99% with no flags, or 100% with 1 minor flag<br/>
-                  Needs Improvement: 70–82.99%, or 83–99% with 1 minor flag<br/>
+                  Weekly Rating reflects how you performed this week — it's based on your Total Score plus any safety, attendance, or behavioral flags.
+                  <br />
+                  Perfect: 100% score with zero flags
+                  <br />
+                  Meets Requirements: 83–99% with no flags, or 100% with 1 minor flag
+                  <br />
+                  Needs Improvement: 70–82.99%, or 83–99% with 1 minor flag
+                  <br />
                   Action Required: Less than 70%, or any score with 3+ minor flags or 1 major flag
                 </div>
               )}
             </div>
+
             {/* 3 */}
             <div>
-              <button
-                onClick={() => setShowCP(!showCP)}
-                className="font-medium"
-              >
+              <button onClick={() => setShowCP(!showCP)} className="font-medium">
                 What are Call-out Penalties? {showCP ? "▲" : "▼"}
               </button>
               {showCP && (
                 <div className="mt-1">
-                  • Block Level Callouts = Calling out before the trip has populated with stops<br/>
-                  • Load Level Callouts = Calling out after the trip has populated with stops (trips usually populate 16–18 hours before a trip start)<br/><br/>
-                  • Block-level Callout: –10 points (1 instance in 2 weeks)<br/>
-                  • 2+ Block Callouts: –15 points<br/>
-                  • Load-level Callout: –17.1 points (1 instance in 6 weeks)<br/>
-                  • 2+ Load-level Callouts: –20 points<br/>
+                  • Block Level Callouts = Calling out before the trip has populated with stops
+                  <br />
+                  • Load Level Callouts = Calling out after the trip has populated with stops (trips usually populate 16–18 hours before a trip start)
+                  <br /><br />
+                  • Block-level Callout: –10 points (1 instance in 2 weeks)
+                  <br />
+                  • 2+ Block Callouts: –15 points
+                  <br />
+                  • Load-level Callout: –17.1 points (1 instance in 6 weeks)
+                  <br />
+                  • 2+ Load-level Callouts: –20 points
+                  <br />
                   Penalties last 2 weeks for blocks and 6 weeks for loads, affecting eligibility and ratings.
                 </div>
               )}
             </div>
+
             {/* 4 */}
             <div>
-              <button
-                onClick={() => setShowST(!showST)}
-                className="font-medium"
-              >
+              <button onClick={() => setShowST(!showST)} className="font-medium">
                 What is S-Tier? {showST ? "▲" : "▼"}
               </button>
               {showST && (
                 <div className="mt-1">
-                  S-Tier is a special performance tier reserved for drivers who
-                  achieve 13 consecutive Perfect weeks. Once unlocked, S-Tier
-                  grants access to the 5+ year payband — even if you haven't reached
-                  5 years of tenure yet. However, you must maintain Perfect rating
-                  to stay in S-Tier.
+                  S-Tier is a special performance tier reserved for drivers who achieve 13 consecutive Perfect weeks. Once unlocked, S-Tier grants access to the 5+ year payband — even if you haven't reached 5 years of tenure yet. However, you must maintain Perfect rating to stay in S-Tier.
                 </div>
               )}
             </div>
+
             {/* 5 */}
             <div>
-              <button
-                onClick={() => setShowDQ(!showDQ)}
-                className="font-medium"
-              >
+              <button onClick={() => setShowDQ(!showDQ)} className="font-medium">
                 What disqualifies me from getting a bonus? {showDQ ? "▲" : "▼"}
               </button>
               {showDQ && (
                 <div className="mt-1">
-                  • Your Weekly Rating is NI or AR<br/>
-                  • You receive a major safety flag (e.g., camera, following distance, seatbelt)<br/>
-                  • You fail to meet Grade + Tenure + Scorecard thresholds<br/>
+                  • Your Weekly Rating is NI or AR
+                  <br />
+                  • You receive a major safety flag (e.g., camera, following distance, seatbelt)
+                  <br />
+                  • You fail to meet Grade + Tenure + Scorecard thresholds
+                  <br />
                   • You have a recent severe event that disqualifies you
                 </div>
               )}
             </div>
+
             {/* 6 */}
             <div>
-              <button
-                onClick={() => setShowNDW(!showNDW)}
-                className="font-medium"
-              >
+              <button onClick={() => setShowNDW(!showNDW)} className="font-medium">
                 How does the Netradyne Bonus work? {showNDW ? "▲" : "▼"}
               </button>
               {showNDW && (
                 <div className="mt-1">
-                  The Netradyne Bonus is a separate quarterly incentive based on
-                  camera safety scores.<br/>
-                  • Stark must earn Gold or Silver on Amazon's safety score<br/>
-                  • You must have a Perfect or Meets Requirements rating<br/>
-                  • You must not have any major camera flags or severe events
-                  in the last 6 weeks<br/>
-                  If eligible, your Netradyne bonus accrues weekly and is paid out
-                  in a lump sum at the end of the quarter.
+                  The Netradyne Bonus is a separate quarterly incentive based on camera safety scores.
+                  <br />
+                  • Stark must earn Gold or Silver on Amazon's safety score
+                  <br />
+                  • You must have a Perfect or Meets Requirements rating
+                  <br />
+                  • You must not have any major camera flags or severe events in the last 6 weeks
+                  <br />
+                  If eligible, your Netradyne bonus accrues weekly and is paid out in a lump sum at the end of each quarter.
                 </div>
               )}
             </div>
+
             {/* Links */}
             <div>
               <a
