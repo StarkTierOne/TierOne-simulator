@@ -25,16 +25,13 @@ const BONUS_MATRIX = {
 };
 
 export default function App() {
-  // scroll/focus helper
+  // Scroll/focus helper
   const focusHours = () => {
     const el = document.getElementById("hours");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
-      el.focus();
-    }
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" }) || el.focus();
   };
 
-  // Core form state
+  // Core state
   const [role, setRole] = useState("");
   const [hours, setHours] = useState("");
   const [baseRate, setBaseRate] = useState("");
@@ -64,7 +61,7 @@ export default function App() {
   const [daysLunch, setDaysLunch] = useState("");
   const [showLunchExp, setShowLunchExp] = useState(false);
 
-  // FAQ toggles
+  // FAQs
   const [showFAQ, setShowFAQ] = useState(false);
   const [showPG, setShowPG] = useState(false);
   const [showWR, setShowWR] = useState(false);
@@ -73,7 +70,7 @@ export default function App() {
   const [showDQ, setShowDQ] = useState(false);
   const [showNDW, setShowNDW] = useState(false);
 
-  // Whenever role switches to Supervisor, clear 39 & Lunch
+  // Clear 39 & Lunch when Supervisor selected
   useEffect(() => {
     if (role === "Supervisor") {
       setCheck39(false);
@@ -81,7 +78,7 @@ export default function App() {
     }
   }, [role]);
 
-  // Clear S-Tier, 39 & Lunch when rating is no longer Perfect
+  // Clear extras on rating change
   useEffect(() => {
     if (rating !== "Perfect") {
       setSTier(false);
@@ -90,7 +87,6 @@ export default function App() {
     }
   }, [rating]);
 
-  // Reset form entirely
   const resetForm = () => {
     setRole(""); setHours(""); setBaseRate("");
     setScorecard(""); setRating(""); setTier("");
@@ -102,53 +98,53 @@ export default function App() {
   };
   const printResults = () => window.print();
 
-  // Determine bonus rate from matrix
+  // Bonus lookup
   const getTenureIndex = () => {
     if (sTier && ["Fantastic Plus","Fantastic","Good","Fair"].includes(scorecard)) return 5;
-    const y = parseInt(tenure.replace("+",""), 10);
+    const y = parseInt(tenure.replace("+",""),10);
     return isNaN(y) ? 0 : Math.min(y,5);
   };
   const getBonusRate = () => {
-    const key = rating === "Meets Requirements" ? "Meets Requirements" : rating;
+    const key = rating==="Meets Requirements" ? "Meets Requirements" : rating;
     const card = BONUS_MATRIX[scorecard]?.[key];
     if (!card) return null;
     const tk = sTier ? "A" : (["D","F"].includes(tier) ? "D & F" : tier);
     const rate = card[tk]?.[getTenureIndex()] ?? 24;
-    return { hourly: Math.min(rate,32), bonusOnly: (Math.min(rate,32) - 24).toFixed(2) };
+    return { hourly: Math.min(rate,32), bonusOnly: (Math.min(rate,32)-24).toFixed(2) };
   };
-  const result      = useMemo(() => getBonusRate(), [scorecard, rating, tier, tenure, sTier]);
+  const result      = useMemo(() => getBonusRate(), [scorecard,rating,tier,tenure,sTier]);
   const hourlyBonus = result ? parseFloat(result.bonusOnly) : 0;
 
   // Hours & OT
-  const totalH = parseFloat(hours || 0);
+  const totalH = parseFloat(hours||0);
   const otH    = totalH > 40 ? totalH - 40 : 0;
 
   // Base rate
-  const base = role === "Driver" ? 24 : (parseFloat(baseRate) || 24);
+  const base = role==="Driver" ? 24 : (parseFloat(baseRate)||24);
 
-  // 39-Hour Guarantee pay calculation
+  // 39-Hour Guarantee pay
   const is39Elig = check39 &&
-    (role === "Driver" || role === "Trainer") &&
-    rating === "Perfect" &&
-    parseInt(days39 || "0", 10) >= 3 &&
-    dRejects === "No";
-  const missingH     = is39Elig && totalH < 39 ? 39 - totalH : 0;
+    (role==="Driver"||role==="Trainer") &&
+    rating==="Perfect" &&
+    parseInt(days39||"0",10)>=3 &&
+    dRejects==="No";
+  const missingH     = is39Elig && totalH<39 ? 39 - totalH : 0;
   const guaranteePay = (base * missingH).toFixed(2);
 
-  // Lunch Bonus (½-hour per day)
+  // Lunch Bonus (½ hr/day)
   const lunchAmt = (checkLunch &&
-    (role === "Driver" || role === "Trainer") &&
-    rating === "Perfect" &&
+    (role==="Driver"||role==="Trainer") &&
+    rating==="Perfect" &&
     ["A","B"].includes(tier))
-    ? ((base / 2) * parseInt(daysLunch || "0", 10)).toFixed(2)
+    ? ((base/2) * parseInt(daysLunch||"0",10)).toFixed(2)
     : "0.00";
 
   // Netradyne bonus
   const netBonus = (checkND &&
     ["Perfect","Meets Requirements"].includes(rating) &&
-    netradyne !== "None" &&
-    severeEvent === "No")
-    ? (netradyne === "Gold" ? 20 : 10)
+    netradyne!=="None" &&
+    severeEvent==="No")
+    ? (netradyne==="Gold" ? 20 : 10)
     : 0;
 
   // Totals
@@ -172,7 +168,7 @@ export default function App() {
         {/* Role */}
         <div>
           <label className="block font-medium mb-1">Role</label>
-          <select value={role} onChange={e => setRole(e.target.value)} className="w-full border p-2 rounded">
+          <select value={role} onChange={e=>setRole(e.target.value)} className="w-full border p-2 rounded">
             <option value="">-- Select role --</option>
             <option>Driver</option>
             <option>Trainer</option>
@@ -182,25 +178,27 @@ export default function App() {
 
         {/* Total Hours */}
         <div>
-          <label htmlFor="hours" className="block font-medium mb-1">Total Hours Worked (Optional)</label>
+          <label htmlFor="hours" className="block font-medium mb-1">
+            Total Hours Worked (Optional)
+          </label>
           <input
             id="hours"
             type="number"
             value={hours}
-            onChange={e => setHours(e.target.value)}
+            onChange={e=>setHours(e.target.value)}
             placeholder="e.g. 38.5"
             className="w-full border p-2 rounded"
           />
         </div>
 
         {/* Base Rate */}
-        {(role === "Trainer" || role === "Supervisor") && (
+        {(role==="Trainer"||role==="Supervisor") && (
           <div>
             <label className="block font-medium mb-1">Base Rate (Optional)</label>
             <input
               type="number"
               value={baseRate}
-              onChange={e => setBaseRate(e.target.value)}
+              onChange={e=>setBaseRate(e.target.value)}
               placeholder="e.g. 27"
               className="w-full border p-2 rounded"
             />
@@ -210,7 +208,7 @@ export default function App() {
         {/* Scorecard */}
         <div>
           <label className="block font-medium mb-1">Amazon Scorecard</label>
-          <select value={scorecard} onChange={e => setScorecard(e.target.value)} className="w-full border p-2 rounded">
+          <select value={scorecard} onChange={e=>setScorecard(e.target.value)} className="w-full border p-2 rounded">
             <option value="">-- Select scorecard --</option>
             <option>Fantastic Plus</option>
             <option>Fantastic</option>
@@ -223,7 +221,7 @@ export default function App() {
         {/* Rating */}
         <div>
           <label className="block font-medium mb-1">Weekly Rating</label>
-          <select value={rating} onChange={e => setRating(e.target.value)} className="w-full border p-2 rounded">
+          <select value={rating} onChange={e=>setRating(e.target.value)} className="w-full border p-2 rounded">
             <option value="">-- Select rating --</option>
             <option>Perfect</option>
             <option>Meets Requirements</option>
@@ -235,7 +233,7 @@ export default function App() {
         {/* Grade */}
         <div>
           <label className="block font-medium mb-1">Performance Grade</label>
-          <select value={tier} onChange={e => setTier(e.target.value)} className="w-full border p-2 rounded">
+          <select value={tier} onChange={e=>setTier(e.target.value)} className="w-full border p-2 rounded">
             <option value="">-- Select grade --</option>
             <option>A</option>
             <option>B</option>
@@ -248,7 +246,7 @@ export default function App() {
         {/* Tenure */}
         <div>
           <label className="block font-medium mb-1">Years at Stark</label>
-          <select value={tenure} onChange={e => setTenure(e.target.value)} className="w-full border p-2 rounded">
+          <select value={tenure} onChange={e=>setTenure(e.target.value)} className="w-full border p-2 rounded">
             <option value="">-- Select tenure --</option>
             <option>&lt;1</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5+</option>
           </select>
@@ -259,8 +257,8 @@ export default function App() {
           <input
             type="checkbox"
             checked={sTier}
-            onChange={e => setSTier(e.target.checked)}
-            disabled={rating !== "Perfect"}
+            onChange={e=>setSTier(e.target.checked)}
+            disabled={rating!=="Perfect"}
             className="w-5 h-5"
           />
           <label className="font-medium">S-Tier (13 Perfect Weeks)</label>
@@ -272,28 +270,28 @@ export default function App() {
             <input
               type="checkbox"
               checked={checkND}
-              onChange={e => setCheckND(e.target.checked)}
+              onChange={e=>setCheckND(e.target.checked)}
               className="w-5 h-5"
             />
             <label className="font-medium">Would you like to check your Netradyne Bonus?</label>
           </div>
-          {(role === "Driver" || role === "Trainer") && rating === "Perfect" && (
+          {(role==="Driver"||role==="Trainer") && rating==="Perfect" && (
             <div className="flex items-center space-x-2">
               <input
                 type="checkbox"
                 checked={check39}
-                onChange={e => setCheck39(e.target.checked)}
+                onChange={e=>setCheck39(e.target.checked)}
                 className="w-5 h-5"
               />
               <label className="font-medium">Would you like to check if you qualify for the 39-Hour Guarantee?</label>
             </div>
           )}
-          {(role === "Driver" || role === "Trainer") && rating === "Perfect" && ["A","B"].includes(tier) && (
+          {(role==="Driver"||role==="Trainer") && rating==="Perfect" && ["A","B"].includes(tier) && (
             <div className="flex items-center space-x-2">
               <input
                 type="checkbox"
                 checked={checkLunch}
-                onChange={e => setCheckLunch(e.target.checked)}
+                onChange={e=>setCheckLunch(e.target.checked)}
                 className="w-5 h-5"
               />
               <label className="font-medium">Would you like to check if you qualify for the Paid Lunch Bonus?</label>
@@ -307,16 +305,16 @@ export default function App() {
         <div className="bg-green-50 p-6 rounded-lg shadow space-y-4">
           <h2 className="text-2xl font-semibold">📸 Netradyne Bonus</h2>
           <label className="block font-medium">Status</label>
-          <select value={netradyne} onChange={e => setNetradyne(e.target.value)} className="w-full border p-2 rounded">
+          <select value={netradyne} onChange={e=>setNetradyne(e.target.value)} className="w-full border p-2 rounded">
             <option value="">--</option><option>Gold</option><option>Silver</option><option>None</option>
           </select>
           <label className="block font-medium">Any Severe Events in Last 6 Weeks?</label>
-          <select value={severeEvent} onChange={e => setSevereEvent(e.target.value)} className="w-full border p-2 rounded">
+          <select value={severeEvent} onChange={e=>setSevereEvent(e.target.value)} className="w-full border p-2 rounded">
             <option value="">--</option><option>No</option><option>Yes</option>
           </select>
           <p className="font-medium">Netradyne Bonus: ${netBonus.toFixed(2)}</p>
-          <button className="font-semibold text-blue-600" onClick={() => setShowNDE(!showNDE)}>
-            Bonus Explainer {showNDE ? "▲" : "▼"}
+          <button className="font-semibold text-blue-600" onClick={()=>setShowNDE(!showNDE)}>
+            Bonus Explainer {showNDE?"▲":"▼"}
           </button>
           {showNDE && (
             <div className="text-sm pl-4">
@@ -331,11 +329,11 @@ export default function App() {
       )}
 
       {/* 39-HOUR GUARANTEE */}
-      {check39 && (role === "Driver" || role === "Trainer") && (
+      {check39 && (role==="Driver"||role==="Trainer") && (
         <div className="bg-blue-50 p-6 rounded-lg shadow space-y-4">
           <h2 className="text-2xl font-semibold">🕒 39-Hour Guarantee</h2>
-          <button className="font-semibold text-blue-600" onClick={() => setShow39Exp(!show39Exp)}>
-            What’s the 39-Hour Guarantee? {show39Exp ? "▲" : "▼"}
+          <button className="font-semibold text-blue-600" onClick={()=>setShow39Exp(!show39Exp)}>
+            What’s the 39-Hour Guarantee? {show39Exp?"▲":"▼"}
           </button>
           {show39Exp && (
             <div className="text-sm pl-4">
@@ -343,27 +341,27 @@ export default function App() {
             </div>
           )}
           <label className="block font-medium">Days Worked</label>
-          <select value={days39} onChange={e => setDays39(e.target.value)} className="w-full border p-2 rounded">
+          <select value={days39} onChange={e=>setDays39(e.target.value)} className="w-full border p-2 rounded">
             <option value="">--</option>
-            {Array.from({length:7}, (_,i) => <option key={i} value={i+1}>{i+1}</option>)}
+            {Array.from({length:7},(_,i)=><option key={i} value={i+1}>{i+1}</option>)}
           </select>
           <label className="block font-medium">Driver-Rejected Legs?</label>
-          <select value={dRejects} onChange={e => setDRejects(e.target.value)} className="w-full border p-2 rounded">
+          <select value={dRejects} onChange={e=>setDRejects(e.target.value)} className="w-full border p-2 rounded">
             <option value="">--</option><option>No</option><option>Yes</option>
           </select>
           <label className="block font-medium">Amazon-Cancelled Legs?</label>
-          <select value={aRejects} onChange={e => setARejects(e.target.value)} className="w-full border p-2 rounded">
+          <select value={aRejects} onChange={e=>setARejects(e.target.value)} className="w-full border p-2 rounded">
             <option value="">--</option><option>No</option><option>Yes</option>
           </select>
         </div>
       )}
 
       {/* PAID LUNCH BONUS */}
-      {checkLunch && (role === "Driver" || role === "Trainer") && (
+      {checkLunch && (role==="Driver"||role==="Trainer") && (
         <div className="bg-yellow-50 p-6 rounded-lg shadow space-y-4">
           <h2 className="text-2xl font-semibold">🍽️ Paid Lunch Bonus</h2>
-          <button className="font-semibold text-blue-600" onClick={() => setShowLunchExp(!showLunchExp)}>
-            What’s the Paid Lunch Bonus? {showLunchExp ? "▲" : "▼"}
+          <button className="font-semibold text-blue-600" onClick={()=>setShowLunchExp(!showLunchExp)}>
+            What’s the Paid Lunch Bonus? {showLunchExp?"▲":"▼"}
           </button>
           {showLunchExp && (
             <div className="text-sm pl-4">
@@ -371,9 +369,9 @@ export default function App() {
             </div>
           )}
           <label className="block font-medium">Days Worked</label>
-          <select value={daysLunch} onChange={e => setDaysLunch(e.target.value)} className="w-full border p-2 rounded">
+          <select value={daysLunch} onChange={e=>setDaysLunch(e.target.value)} className="w-full border p-2 rounded">
             <option value="">--</option>
-            {Array.from({length:7}, (_,i) => <option key={i} value={i+1}>{i+1}</option>)}
+            {Array.from({length:7},(_,i)=><option key={i} value={i+1}>{i+1}</option>)}
           </select>
         </div>
       )}
@@ -402,14 +400,14 @@ export default function App() {
       {/* FAQs */}
       <div className="space-y-4">
         <button onClick={()=>setShowFAQ(!showFAQ)} className="font-semibold">
-          Frequently Asked Questions {showFAQ ? "▲" : "▼"}
+          Frequently Asked Questions {showFAQ?"▲":"▼"}
         </button>
         {showFAQ && (
           <div className="text-sm space-y-4 pl-4">
             {/* 1 */}
             <div>
               <button onClick={()=>setShowPG(!showPG)} className="font-medium">
-                What is a Performance Grade (A–F)? {showPG ? "▲" : "▼"}
+                What is a Performance Grade (A–F)? {showPG?"▲":"▼"}
               </button>
               {showPG && (
                 <div className="mt-1">
@@ -425,7 +423,7 @@ export default function App() {
             {/* 2 */}
             <div>
               <button onClick={()=>setShowWR(!showWR)} className="font-medium">
-                How is Weekly Rating determined? {showWR ? "▲" : "▼"}
+                How is Weekly Rating determined? {showWR?"▲":"▼"}
               </button>
               {showWR && (
                 <div className="mt-1">
@@ -440,12 +438,12 @@ export default function App() {
             {/* 3 */}
             <div>
               <button onClick={()=>setShowCP(!showCP)} className="font-medium">
-                What are Call-out Penalties? {showCP ? "▲" : "▼"}
+                What are Call-out Penalties? {showCP?"▲":"▼"}
               </button>
               {showCP && (
                 <div className="mt-1">
                   • Block Level Callouts = Calling out before the trip has populated with stops<br/>
-                  • Load Level Callouts = Calling out after the trip has populated with stops (16–18h before start)<br/><br/>
+                  • Load Level Callouts = Calling out after the trip has populated with stops (trips usually populate 16–18 hours before a trip start)<br/><br/>
                   • Block-level Callout: –10 points (1 instance in 2 weeks)<br/>
                   • 2+ Block Callouts: –15 points<br/>
                   • Load-level Callout: –17.1 points (1 instance in 6 weeks)<br/>
@@ -457,7 +455,7 @@ export default function App() {
             {/* 4 */}
             <div>
               <button onClick={()=>setShowST(!showST)} className="font-medium">
-                What is S-Tier? {showST ? "▲" : "▼"}
+                What is S-Tier? {showST?"▲":"▼"}
               </button>
               {showST && (
                 <div className="mt-1">
@@ -468,7 +466,7 @@ export default function App() {
             {/* 5 */}
             <div>
               <button onClick={()=>setShowDQ(!showDQ)} className="font-medium">
-                What disqualifies me from getting a bonus? {showDQ ? "▲" : "▼"}
+                What disqualifies me from getting a bonus? {showDQ?"▲":"▼"}
               </button>
               {showDQ && (
                 <div className="mt-1">
@@ -482,7 +480,7 @@ export default function App() {
             {/* 6 */}
             <div>
               <button onClick={()=>setShowNDW(!showNDW)} className="font-medium">
-                How does the Netradyne Bonus work? {showNDW ? "▲" : "▼"}
+                How does the Netradyne Bonus work? {showNDW?"▲":"▼"}
               </button>
               {showNDW && (
                 <div className="mt-1">
@@ -496,16 +494,22 @@ export default function App() {
             </div>
             {/* Links */}
             <div>
-              <a href="https://drive.google.com/file/d/1CWVesfvKWsSFn7wv7bGvHv6kLb20Mzec/view?usp=sharing"
-                 target="_blank" rel="noopener noreferrer"
-                 className="text-blue-600 underline">
+              <a
+                href="https://drive.google.com/file/d/1CWVesfvKWsSFn7wv7bGvHv6kLb20Mzec/view?usp=sharing"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 underline"
+              >
                 📘 View Full Explainer PDF →
               </a>
             </div>
             <div>
-              <a href="https://docs.google.com/spreadsheets/d/1gTmNlGNo_OH1zysEFvh7dAbvEibC5vgoGX6AMINxFWQ/edit?usp=sharing"
-                 target="_blank" rel="noopener noreferrer"
-                 className="text-blue-600 underline">
+              <a
+                href="https://docs.google.com/spreadsheets/d/1gTmNlGNo_OH1zysEFvh7dAbvEibC5vgoGX6AMINxFWQ/edit?usp=sharing"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 underline"
+              >
                 📊 View Bonus Matrix Spreadsheet →
               </a>
             </div>
